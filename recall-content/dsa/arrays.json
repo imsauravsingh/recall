@@ -1,0 +1,11 @@
+{
+  "module": "dsa",
+  "topic": "arrays",
+  "description": "Core array concepts, traversal patterns, and common interview questions.",
+  "patterns": [
+    "two pointers",
+    "sliding window",
+    "prefix sums",
+    "search and partition"
+  ]
+}

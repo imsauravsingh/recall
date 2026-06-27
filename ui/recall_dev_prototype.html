@@ -1,0 +1,523 @@
+
+<h2 class="sr-only">Recall.dev — interactive prototype showing Dashboard, DSA patterns, Recall Mode, and Quick Templates screens.</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.rd{font-family:var(--font-sans);display:grid;grid-template-columns:180px 1fr;min-height:600px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-tertiary)}
+.rd-sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:14px 0;display:flex;flex-direction:column}
+.rd-logo{display:flex;align-items:center;gap:8px;padding:0 14px 14px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:10px}
+.rd-logo-icon{width:28px;height:28px;background:#EEEDFE;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#534AB7}
+.rd-logo-text{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.rd-new{margin:0 10px 12px;background:#534AB7;color:#fff;border:none;border-radius:var(--border-radius-md);padding:8px 0;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+.rd-new:hover{background:#3C3489}
+.rd-section{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);padding:8px 14px 4px}
+.rd-nav-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;border-radius:0}
+.rd-nav-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.rd-nav-item.active{background:#EEEDFE;color:#3C3489;font-weight:500}
+.rd-nav-item i{font-size:15px}
+.rd-badge{background:#E24B4A;color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-left:auto}
+.rd-main{display:flex;flex-direction:column;overflow:hidden}
+.rd-topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.rd-search{flex:1;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:6px 10px;font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px}
+.rd-topbar-right{display:flex;align-items:center;gap:10px}
+.rd-avatar{width:28px;height:28px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#534AB7}
+.rd-content{padding:16px;flex:1;overflow:auto}
+.rd-screen{display:none}
+.rd-screen.active{display:block}
+
+.rd-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.rd-metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.rd-metric-val{font-size:20px;font-weight:500;color:var(--color-text-primary);line-height:1.1}
+.rd-metric-label{font-size:10px;color:var(--color-text-secondary);margin-top:3px}
+.rd-metric-sub{font-size:10px;color:var(--color-text-tertiary);margin-top:1px}
+
+.rd-section-title{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin:0 0 8px}
+
+.rd-rounds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.rd-round-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 12px;cursor:pointer}
+.rd-round-card:hover{border-color:var(--color-border-secondary)}
+.rd-round-name{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.rd-round-meta{font-size:10px;color:var(--color-text-secondary);margin-bottom:6px}
+.rd-mini-bar{height:3px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden}
+.rd-mini-fill{height:100%;border-radius:2px}
+
+.rd-queue{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:14px}
+.rd-queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rd-queue-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.rd-queue-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.rd-queue-item:last-child{border-bottom:none}
+.rd-queue-name{font-size:12px;color:var(--color-text-primary);flex:1}
+.rd-queue-tag{font-size:10px;padding:2px 6px;border-radius:10px;background:#EEEDFE;color:#3C3489}
+.rd-queue-due{font-size:10px;font-weight:500}
+.due-today{color:#A32D2D}
+.due-soon{color:#854F0B}
+.due-ok{color:#0F6E56}
+
+.rd-pattern-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.rd-ptab{background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--color-text-secondary);cursor:pointer}
+.rd-ptab.active{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;font-weight:500}
+
+.rd-pattern-list{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.rd-pattern-row{display:grid;grid-template-columns:1fr 60px 90px 80px 70px;align-items:center;padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.rd-pattern-row:last-child{border-bottom:none}
+.rd-pattern-row:hover{background:var(--color-background-secondary)}
+.rd-pattern-row.header{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.04em;cursor:default;background:var(--color-background-secondary)}
+.rd-pattern-row.header:hover{background:var(--color-background-secondary)}
+.rd-pname{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.rd-psub{font-size:10px;color:var(--color-text-secondary);margin-top:1px}
+.rd-ptopics{font-size:12px;color:var(--color-text-secondary);text-align:center}
+.rd-conf-pill{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.conf-strong{background:#EAF3DE;color:#27500A}
+.conf-medium{background:#FAEEDA;color:#633806}
+.conf-weak{background:#FCEBEB;color:#A32D2D}
+.rd-pbar{height:4px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden}
+.rd-pbar-fill{height:100%;border-radius:2px}
+.rd-prev{font-size:10px;color:var(--color-text-tertiary)}
+
+.rd-recall-header{background:#EEEDFE;border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.rd-recall-title{font-size:16px;font-weight:500;color:#26215C}
+.rd-recall-sub{font-size:12px;color:#534AB7;margin-top:3px}
+.rd-recall-timer{font-size:20px;font-weight:500;color:#3C3489}
+.rd-steps{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto}
+.rd-step{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;white-space:nowrap;border:0.5px solid var(--color-border-tertiary)}
+.rd-step.done{background:#EAF3DE;color:#27500A;border-color:#97C459}
+.rd-step.current{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.rd-step.pending{color:var(--color-text-tertiary)}
+.rd-recall-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:10px}
+.rd-recall-q{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px}
+.rd-answer-area{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;min-height:80px;font-size:12px;color:var(--color-text-secondary);line-height:1.6;cursor:pointer;border:0.5px solid var(--color-border-tertiary)}
+.rd-answer-area.revealed{background:#EAF3DE;border-color:#97C459;color:#173404}
+.rd-reveal-hint{font-size:11px;color:var(--color-text-tertiary);margin-top:6px}
+.rd-rating{display:flex;gap:8px;margin-top:10px}
+.rd-rate-btn{flex:1;padding:7px 0;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);font-size:11px;font-weight:500;cursor:pointer;background:transparent;text-align:center}
+.rate-forgot{color:#A32D2D;border-color:#F09595}
+.rate-forgot:hover{background:#FCEBEB}
+.rate-hard{color:#854F0B;border-color:#EF9F27}
+.rate-hard:hover{background:#FAEEDA}
+.rate-medium{color:#185FA5;border-color:#85B7EB}
+.rate-medium:hover{background:#E6F1FB}
+.rate-easy{color:#0F6E56;border-color:#5DCAA5}
+.rate-easy:hover{background:#E1F5EE}
+
+.rd-tmpl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.rd-tmpl-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;cursor:pointer}
+.rd-tmpl-card:hover{border-color:#AFA9EC}
+.rd-tmpl-icon{width:36px;height:36px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:18px}
+.rd-tmpl-name{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.rd-tmpl-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.4;margin-bottom:8px}
+.rd-tmpl-tags{display:flex;gap:4px;flex-wrap:wrap}
+.rd-tmpl-tag{font-size:10px;padding:2px 6px;border-radius:10px}
+.tag-dsa{background:#E6F1FB;color:#0C447C}
+.tag-sd{background:#FAEEDA;color:#633806}
+.tag-be{background:#E1F5EE;color:#085041}
+.tag-ai{background:#EEEDFE;color:#3C3489}
+.tag-hr{background:#FBEAF0;color:#72243E}
+.tag-easy{background:#EAF3DE;color:#27500A}
+.tag-medium{background:#FAEEDA;color:#633806}
+.tag-hard{background:#FCEBEB;color:#A32D2D}
+.rd-use-btn{margin-top:8px;width:100%;padding:6px 0;background:#534AB7;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;cursor:pointer}
+.rd-use-btn:hover{background:#3C3489}
+
+.rd-action-row{display:flex;gap:8px;margin-top:12px}
+.rd-action-btn{font-size:11px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px}
+.rd-action-btn:hover{background:var(--color-background-secondary)}
+.rd-recall-start-btn{background:#534AB7;color:#fff;border:none;border-radius:var(--border-radius-md);padding:8px 16px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px}
+.rd-recall-start-btn:hover{background:#3C3489}
+
+@media(prefers-color-scheme:dark){
+.rd-new{background:#7F77DD}
+.rd-nav-item.active{background:#26215C;color:#CECBF6}
+.rd-queue-tag{background:#26215C;color:#CECBF6}
+.rd-ptab.active{background:#26215C;color:#CECBF6;border-color:#534AB7}
+.rd-recall-header{background:#26215C}
+.rd-recall-title{color:#CECBF6}
+.rd-recall-sub{color:#AFA9EC}
+.rd-recall-timer{color:#CECBF6}
+.rd-step.done{background:#085041;color:#9FE1CB;border-color:#1D9E75}
+.rd-step.current{background:#26215C;color:#CECBF6;border-color:#534AB7}
+.rd-answer-area.revealed{background:#085041;border-color:#1D9E75;color:#9FE1CB}
+.conf-strong{background:#085041;color:#9FE1CB}
+.conf-medium{background:#412402;color:#FAC775}
+.conf-weak{background:#501313;color:#F09595}
+.rd-use-btn{background:#534AB7}
+.rd-logo-icon{background:#26215C;color:#CECBF6}
+.rd-avatar{background:#26215C;color:#CECBF6}
+.rd-round-card,.rd-queue,.rd-pattern-list,.rd-recall-card,.rd-tmpl-card{background:var(--color-background-secondary)}
+.tag-dsa{background:#042C53;color:#B5D4F4}
+.tag-sd{background:#412402;color:#FAC775}
+.tag-be{background:#04342C;color:#9FE1CB}
+.tag-ai{background:#26215C;color:#CECBF6}
+.tag-hr{background:#4B1528;color:#F4C0D1}
+.tag-easy{background:#085041;color:#9FE1CB}
+.tag-medium{background:#412402;color:#FAC775}
+.tag-hard{background:#501313;color:#F09595}
+}
+</style>
+
+<div class="rd">
+  <div class="rd-sidebar">
+    <div class="rd-logo">
+      <div class="rd-logo-icon"><i class="ti ti-brain" style="font-size:15px" aria-hidden="true"></i></div>
+      <span class="rd-logo-text">Recall.dev</span>
+    </div>
+    <button class="rd-new" onclick="switchScreen('templates')"><i class="ti ti-plus" style="font-size:13px" aria-hidden="true"></i> New Topic</button>
+    <span class="rd-section">Main</span>
+    <div class="rd-nav-item active" onclick="nav(this,'dashboard')"><i class="ti ti-home" aria-hidden="true"></i> Dashboard</div>
+    <div class="rd-nav-item" onclick="nav(this,'queue')"><i class="ti ti-clock" aria-hidden="true"></i> Recall Queue <span class="rd-badge">7</span></div>
+    <span class="rd-section">Interview Rounds</span>
+    <div class="rd-nav-item" onclick="nav(this,'dsa')"><i class="ti ti-code" aria-hidden="true"></i> DSA</div>
+    <div class="rd-nav-item" onclick="nav(this,'dsa')"><i class="ti ti-topology-star" aria-hidden="true"></i> System Design</div>
+    <div class="rd-nav-item" onclick="nav(this,'dsa')"><i class="ti ti-server" aria-hidden="true"></i> Backend Engg</div>
+    <div class="rd-nav-item" onclick="nav(this,'dsa')"><i class="ti ti-robot" aria-hidden="true"></i> AI Rounds</div>
+    <div class="rd-nav-item" onclick="nav(this,'dsa')"><i class="ti ti-users" aria-hidden="true"></i> HR / Behavioral</div>
+    <span class="rd-section">Prep</span>
+    <div class="rd-nav-item" onclick="nav(this,'templates')"><i class="ti ti-template" aria-hidden="true"></i> Templates</div>
+    <div class="rd-nav-item" onclick="nav(this,'dsa')"><i class="ti ti-trophy" aria-hidden="true"></i> Milestones</div>
+    <div style="margin-top:auto;padding:10px 10px 0">
+      <div style="background:#EEEDFE;border-radius:var(--border-radius-md);padding:10px;margin:0">
+        <div style="font-size:11px;font-weight:500;color:#3C3489;margin-bottom:4px"><i class="ti ti-sparkles" style="font-size:12px" aria-hidden="true"></i> AI Features</div>
+        <div style="font-size:10px;color:#534AB7;line-height:1.4;margin-bottom:6px">Unlock AI recall assistant, smart suggestions and more.</div>
+        <button style="width:100%;background:#534AB7;color:#fff;border:none;border-radius:6px;padding:5px 0;font-size:10px;font-weight:500;cursor:pointer">Login to unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rd-main">
+    <div class="rd-topbar">
+      <div class="rd-search"><i class="ti ti-search" style="font-size:13px" aria-hidden="true"></i><span>Search topics, notes, keywords...</span></div>
+      <div class="rd-topbar-right">
+        <i class="ti ti-bell" style="font-size:17px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        <div class="rd-avatar">SS</div>
+        <span style="font-size:12px;color:var(--color-text-primary);font-weight:500">Saurav</span>
+      </div>
+    </div>
+
+    <div class="rd-content">
+
+      <div id="s-dashboard" class="rd-screen active">
+        <div class="rd-metrics">
+          <div class="rd-metric">
+            <div class="rd-metric-val">128</div>
+            <div class="rd-metric-label">Total topics</div>
+            <div class="rd-metric-sub">+12 this week</div>
+          </div>
+          <div class="rd-metric">
+            <div class="rd-metric-val">7</div>
+            <div class="rd-metric-label">Recall queue</div>
+            <div class="rd-metric-sub">Due for revision</div>
+          </div>
+          <div class="rd-metric">
+            <div class="rd-metric-val">72%</div>
+            <div class="rd-metric-label">Milestone progress</div>
+            <div class="rd-metric-sub">Staff Engineer path</div>
+          </div>
+          <div class="rd-metric">
+            <div class="rd-metric-val">68%</div>
+            <div class="rd-metric-label">Interview readiness</div>
+            <div class="rd-metric-sub">Overall score</div>
+          </div>
+        </div>
+
+        <div class="rd-section-title">Interview rounds overview</div>
+        <div class="rd-rounds">
+          <div class="rd-round-card" onclick="nav(document.querySelector('[onclick*=dsa]'),'dsa')">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-code" style="font-size:14px;color:#185FA5" aria-hidden="true"></i><div class="rd-round-name">DSA</div></div>
+            <div class="rd-round-meta">84 topics · 62% recall</div>
+            <div class="rd-mini-bar"><div class="rd-mini-fill" style="width:62%;background:#378ADD"></div></div>
+          </div>
+          <div class="rd-round-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-topology-star" style="font-size:14px;color:#1D9E75" aria-hidden="true"></i><div class="rd-round-name">System Design</div></div>
+            <div class="rd-round-meta">36 topics · 82% recall</div>
+            <div class="rd-mini-bar"><div class="rd-mini-fill" style="width:82%;background:#1D9E75"></div></div>
+          </div>
+          <div class="rd-round-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-server" style="font-size:14px;color:#7F77DD" aria-hidden="true"></i><div class="rd-round-name">Backend Engg</div></div>
+            <div class="rd-round-meta">42 topics · 65% recall</div>
+            <div class="rd-mini-bar"><div class="rd-mini-fill" style="width:65%;background:#7F77DD"></div></div>
+          </div>
+          <div class="rd-round-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-robot" style="font-size:14px;color:#D85A30" aria-hidden="true"></i><div class="rd-round-name">AI Rounds</div></div>
+            <div class="rd-round-meta">22 topics · 65% recall</div>
+            <div class="rd-mini-bar"><div class="rd-mini-fill" style="width:65%;background:#D85A30"></div></div>
+          </div>
+          <div class="rd-round-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-users" style="font-size:14px;color:#D4537E" aria-hidden="true"></i><div class="rd-round-name">HR / Behavioral</div></div>
+            <div class="rd-round-meta">18 topics · 60% recall</div>
+            <div class="rd-mini-bar"><div class="rd-mini-fill" style="width:60%;background:#D4537E"></div></div>
+          </div>
+          <div class="rd-round-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-file-text" style="font-size:14px;color:#BA7517" aria-hidden="true"></i><div class="rd-round-name">Resume Recall</div></div>
+            <div class="rd-round-meta">11 projects · 75% recall</div>
+            <div class="rd-mini-bar"><div class="rd-mini-fill" style="width:75%;background:#BA7517"></div></div>
+          </div>
+        </div>
+
+        <div class="rd-queue">
+          <div class="rd-queue-header">
+            <span class="rd-queue-title">Recall Queue (7)</span>
+            <span style="font-size:11px;color:#534AB7;cursor:pointer" onclick="nav(document.querySelector('[onclick*=queue]'),'queue')">View all</span>
+          </div>
+          <div class="rd-queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Raft Protocol</span><span class="rd-queue-tag">Distributed</span><span class="rd-queue-due due-today">Due today</span></div>
+          <div class="rd-queue-item"><i class="ti ti-database" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">PostgreSQL MVCC</span><span class="rd-queue-tag">Backend</span><span class="rd-queue-due due-soon">Due in 1 day</span></div>
+          <div class="rd-queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Sliding Window</span><span class="rd-queue-tag">DSA</span><span class="rd-queue-due due-soon">Due in 2 days</span></div>
+          <div class="rd-queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Consistent Hashing</span><span class="rd-queue-tag">System Design</span><span class="rd-queue-due due-ok">Due in 3 days</span></div>
+        </div>
+        <div class="rd-action-row">
+          <button class="rd-action-btn" onclick="nav(document.querySelectorAll('.rd-nav-item')[1],'queue');switchScreen('recall')"><i class="ti ti-player-play" style="font-size:13px" aria-hidden="true"></i> Start recall session</button>
+          <button class="rd-action-btn" onclick="sendPrompt('Quiz me on Raft protocol with 3 deep questions')"><i class="ti ti-bulb" style="font-size:13px" aria-hidden="true"></i> AI quiz me ↗</button>
+        </div>
+      </div>
+
+      <div id="s-dsa" class="rd-screen">
+        <div style="margin-bottom:12px">
+          <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px">Interview Rounds / DSA</div>
+          <div style="font-size:12px;color:var(--color-text-secondary)">Data Structures &amp; Algorithms — Master the fundamentals and ace coding interviews.</div>
+        </div>
+        <div class="rd-metrics" style="grid-template-columns:repeat(4,1fr)">
+          <div class="rd-metric"><div class="rd-metric-val">84</div><div class="rd-metric-label">Total topics</div></div>
+          <div class="rd-metric"><div class="rd-metric-val">32</div><div class="rd-metric-label">Strong topics</div><div class="rd-metric-sub">Recall ≥ 70%</div></div>
+          <div class="rd-metric"><div class="rd-metric-val">18</div><div class="rd-metric-label">Weak topics</div><div class="rd-metric-sub">Recall &lt; 40%</div></div>
+          <div class="rd-metric"><div class="rd-metric-val">62%</div><div class="rd-metric-label">Overall recall</div></div>
+        </div>
+        <div class="rd-pattern-tabs">
+          <button class="rd-ptab active">All patterns</button>
+          <button class="rd-ptab" onclick="ptab(this)">Arrays &amp; Hashing</button>
+          <button class="rd-ptab" onclick="ptab(this)">Two Pointers</button>
+          <button class="rd-ptab" onclick="ptab(this)">Sliding Window</button>
+          <button class="rd-ptab" onclick="ptab(this)">Heaps</button>
+          <button class="rd-ptab" onclick="ptab(this)">Graphs</button>
+          <button class="rd-ptab" onclick="ptab(this)">DP</button>
+        </div>
+        <div class="rd-pattern-list">
+          <div class="rd-pattern-row header"><span>Pattern</span><span style="text-align:center">Topics</span><span style="text-align:center">Confidence</span><span>Progress</span><span>Revised</span></div>
+          <div class="rd-pattern-row" onclick="switchScreen('recall')">
+            <div><div class="rd-pname">Arrays &amp; Hashing</div><div class="rd-psub">Hash tables, prefix sum</div></div>
+            <div class="rd-ptopics">12</div>
+            <div><span class="rd-conf-pill conf-strong">75% Strong</span></div>
+            <div class="rd-pbar"><div class="rd-pbar-fill" style="width:75%;background:#1D9E75"></div></div>
+            <div class="rd-prev">1 day ago</div>
+          </div>
+          <div class="rd-pattern-row" onclick="switchScreen('recall')">
+            <div><div class="rd-pname">Sliding Window</div><div class="rd-psub">Fixed, variable window</div></div>
+            <div class="rd-ptopics">10</div>
+            <div><span class="rd-conf-pill conf-strong">80% Strong</span></div>
+            <div class="rd-pbar"><div class="rd-pbar-fill" style="width:80%;background:#1D9E75"></div></div>
+            <div class="rd-prev">2 days ago</div>
+          </div>
+          <div class="rd-pattern-row" onclick="switchScreen('recall')">
+            <div><div class="rd-pname">Heaps (Priority Queue)</div><div class="rd-psub">Top K, merge K lists</div></div>
+            <div class="rd-ptopics">8</div>
+            <div><span class="rd-conf-pill conf-medium">60% Medium</span></div>
+            <div class="rd-pbar"><div class="rd-pbar-fill" style="width:60%;background:#BA7517"></div></div>
+            <div class="rd-prev">3 days ago</div>
+          </div>
+          <div class="rd-pattern-row" onclick="switchScreen('recall')">
+            <div><div class="rd-pname">Graphs</div><div class="rd-psub">BFS, DFS, Topological sort</div></div>
+            <div class="rd-ptopics">11</div>
+            <div><span class="rd-conf-pill conf-weak">45% Weak</span></div>
+            <div class="rd-pbar"><div class="rd-pbar-fill" style="width:45%;background:#E24B4A"></div></div>
+            <div class="rd-prev">6 days ago</div>
+          </div>
+          <div class="rd-pattern-row" onclick="switchScreen('recall')">
+            <div><div class="rd-pname">Dynamic Programming</div><div class="rd-psub">1D DP, 2D DP, Knapsack</div></div>
+            <div class="rd-ptopics">15</div>
+            <div><span class="rd-conf-pill conf-weak">40% Weak</span></div>
+            <div class="rd-pbar"><div class="rd-pbar-fill" style="width:40%;background:#E24B4A"></div></div>
+            <div class="rd-prev">1 week ago</div>
+          </div>
+        </div>
+        <div class="rd-action-row">
+          <button class="rd-recall-start-btn" onclick="switchScreen('recall')"><i class="ti ti-player-play" style="font-size:13px" aria-hidden="true"></i> Start Recall Mode</button>
+          <button class="rd-action-btn" onclick="sendPrompt('Give me a heap problem to practice right now')"><i class="ti ti-code" style="font-size:13px" aria-hidden="true"></i> Practice heap ↗</button>
+        </div>
+      </div>
+
+      <div id="s-recall" class="rd-screen">
+        <div class="rd-recall-header">
+          <div>
+            <div class="rd-recall-title"><i class="ti ti-brain" style="font-size:16px" aria-hidden="true"></i> Recall Mode — Sliding Window</div>
+            <div class="rd-recall-sub">Tap each section · recall from memory first · then reveal</div>
+          </div>
+          <div class="rd-recall-timer" id="recall-timer">00:00</div>
+        </div>
+        <div class="rd-steps">
+          <div class="rd-step done"><i class="ti ti-check" style="font-size:11px" aria-hidden="true"></i> Mental Model</div>
+          <div class="rd-step done"><i class="ti ti-check" style="font-size:11px" aria-hidden="true"></i> Execution Flow</div>
+          <div class="rd-step current"><i class="ti ti-point" style="font-size:11px" aria-hidden="true"></i> Code Structure</div>
+          <div class="rd-step pending">Edge Cases</div>
+          <div class="rd-step pending">Complexity</div>
+          <div class="rd-step pending">Common Mistakes</div>
+        </div>
+
+        <div class="rd-recall-card">
+          <div class="rd-recall-q">Code structure — write the sliding window template from memory</div>
+          <div class="rd-answer-area" id="recall-answer" onclick="revealAnswer(this)">
+            <span id="recall-hint-text" style="color:var(--color-text-tertiary)"><i class="ti ti-eye" style="font-size:13px" aria-hidden="true"></i> Try to recall first... then tap to reveal answer</span>
+            <div id="recall-revealed" style="display:none;font-family:var(--font-mono);font-size:11px;line-height:1.8">
+              int left = 0, maxLen = 0;<br>
+              Map&lt;Char,Int&gt; window = new HashMap&lt;&gt;();<br><br>
+              for (int right = 0; right &lt; s.length(); right++) {<br>
+              &nbsp;&nbsp;window.merge(s[right], 1, Integer::sum);<br>
+              &nbsp;&nbsp;while (window.size() &gt; k) {  // shrink condition<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;window.merge(s[left], -1, Integer::sum);<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;if (window.get(s[left]) == 0) window.remove(s[left]);<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;left++;<br>
+              &nbsp;&nbsp;}<br>
+              &nbsp;&nbsp;maxLen = Math.max(maxLen, right - left + 1);<br>
+              }
+            </div>
+          </div>
+          <div class="rd-reveal-hint" id="recall-hint">Tap the box to reveal the answer after you've tried to recall</div>
+          <div class="rd-rating">
+            <button class="rd-rate-btn rate-forgot" onclick="rateRecall(this,'forgot')">Forgot completely</button>
+            <button class="rd-rate-btn rate-hard" onclick="rateRecall(this,'hard')">Hard</button>
+            <button class="rd-rate-btn rate-medium" onclick="rateRecall(this,'medium')">Medium</button>
+            <button class="rd-rate-btn rate-easy" onclick="rateRecall(this,'easy')">Easy</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px">
+            <div class="rd-section-title" style="margin-bottom:6px">Session stats</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div class="rd-metric"><div class="rd-metric-val">3/7</div><div class="rd-metric-label">Completed</div></div>
+              <div class="rd-metric"><div class="rd-metric-val" id="accuracy-val">68%</div><div class="rd-metric-label">Accuracy</div></div>
+            </div>
+          </div>
+          <div style="flex:1;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px">
+            <div class="rd-section-title" style="margin-bottom:6px">Quick hints</div>
+            <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.6;cursor:pointer" onclick="sendPrompt('Explain the sliding window technique with a concrete example and when to use fixed vs variable window')">
+              <i class="ti ti-bulb" style="font-size:12px;color:#BA7517" aria-hidden="true"></i> Fixed vs variable window ↗<br>
+              <i class="ti ti-bulb" style="font-size:12px;color:#BA7517" aria-hidden="true"></i> When to shrink left pointer ↗<br>
+              <i class="ti ti-bulb" style="font-size:12px;color:#BA7517" aria-hidden="true"></i> Common patterns list ↗
+            </div>
+          </div>
+        </div>
+        <div class="rd-action-row">
+          <button class="rd-action-btn" onclick="nav(document.querySelector('.rd-nav-item.active'),'dsa');switchScreen('dsa')"><i class="ti ti-arrow-left" style="font-size:13px" aria-hidden="true"></i> Back to DSA</button>
+          <button class="rd-action-btn" onclick="sendPrompt('Generate 3 more recall questions for sliding window — harder ones')"><i class="ti ti-plus" style="font-size:13px" aria-hidden="true"></i> More questions ↗</button>
+        </div>
+      </div>
+
+      <div id="s-queue" class="rd-screen">
+        <div style="margin-bottom:12px"><div style="font-size:16px;font-weight:500;color:var(--color-text-primary)">Recall Queue</div><div style="font-size:12px;color:var(--color-text-secondary)">7 topics due for revision</div></div>
+        <div class="rd-queue" style="margin-bottom:0">
+          <div class="rd-queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Raft Protocol</span><span class="rd-queue-tag">Distributed</span><span class="rd-queue-due due-today">Due today</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+          <div class="rd-queue-item"><i class="ti ti-database" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">PostgreSQL MVCC</span><span class="rd-queue-tag">Backend</span><span class="rd-queue-due due-soon">Due in 1 day</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+          <div class="rd-queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Sliding Window</span><span class="rd-queue-tag">DSA</span><span class="rd-queue-due due-soon">Due in 2 days</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+          <div class="rd-queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Consistent Hashing</span><span class="rd-queue-tag">System Design</span><span class="rd-queue-due due-ok">Due in 3 days</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+          <div class="rd-queue-item"><i class="ti ti-robot" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">RAG Architecture</span><span class="rd-queue-tag">AI Round</span><span class="rd-queue-due due-ok">Due in 4 days</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+          <div class="rd-queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Dynamic Programming</span><span class="rd-queue-tag">DSA</span><span class="rd-queue-due due-ok">Due in 5 days</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+          <div class="rd-queue-item"><i class="ti ti-users" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="rd-queue-name">Leadership — Conflict story</span><span class="rd-queue-tag">HR</span><span class="rd-queue-due due-ok">Due in 5 days</span><button class="rd-recall-start-btn" style="padding:4px 10px;font-size:10px;margin-left:8px" onclick="switchScreen('recall')">Recall</button></div>
+        </div>
+      </div>
+
+      <div id="s-templates" class="rd-screen">
+        <div style="margin-bottom:12px"><div style="font-size:16px;font-weight:500;color:var(--color-text-primary)">Quick recall templates</div><div style="font-size:12px;color:var(--color-text-secondary)">Pick a template and create your structured recall workspace in one click.</div></div>
+        <div class="rd-tmpl-grid">
+          <div class="rd-tmpl-card">
+            <div class="rd-tmpl-icon" style="background:#E6F1FB"><i class="ti ti-code" style="color:#185FA5;font-size:18px" aria-hidden="true"></i></div>
+            <div class="rd-tmpl-name">Sliding Window</div>
+            <div class="rd-tmpl-desc">All patterns and variations of sliding window technique</div>
+            <div class="rd-tmpl-tags"><span class="rd-tmpl-tag tag-dsa">DSA</span><span class="rd-tmpl-tag tag-medium">Medium</span></div>
+            <button class="rd-use-btn" onclick="switchScreen('recall')">Use template</button>
+          </div>
+          <div class="rd-tmpl-card">
+            <div class="rd-tmpl-icon" style="background:#FAEEDA"><i class="ti ti-topology-star" style="color:#854F0B;font-size:18px" aria-hidden="true"></i></div>
+            <div class="rd-tmpl-name">Rate Limiter</div>
+            <div class="rd-tmpl-desc">Design and implement scalable rate limiting systems</div>
+            <div class="rd-tmpl-tags"><span class="rd-tmpl-tag tag-sd">System Design</span><span class="rd-tmpl-tag tag-medium">Medium</span></div>
+            <button class="rd-use-btn" onclick="switchScreen('recall')">Use template</button>
+          </div>
+          <div class="rd-tmpl-card">
+            <div class="rd-tmpl-icon" style="background:#E1F5EE"><i class="ti ti-server" style="color:#0F6E56;font-size:18px" aria-hidden="true"></i></div>
+            <div class="rd-tmpl-name">Kafka Consumer Groups</div>
+            <div class="rd-tmpl-desc">Consumer groups, offsets, rebalancing and internals</div>
+            <div class="rd-tmpl-tags"><span class="rd-tmpl-tag tag-be">Backend</span><span class="rd-tmpl-tag tag-medium">Medium</span></div>
+            <button class="rd-use-btn" onclick="switchScreen('recall')">Use template</button>
+          </div>
+          <div class="rd-tmpl-card">
+            <div class="rd-tmpl-icon" style="background:#EEEDFE"><i class="ti ti-robot" style="color:#534AB7;font-size:18px" aria-hidden="true"></i></div>
+            <div class="rd-tmpl-name">RAG Architecture</div>
+            <div class="rd-tmpl-desc">Retrieval Augmented Generation system design</div>
+            <div class="rd-tmpl-tags"><span class="rd-tmpl-tag tag-ai">AI Round</span><span class="rd-tmpl-tag tag-hard">Hard</span></div>
+            <button class="rd-use-btn" onclick="switchScreen('recall')">Use template</button>
+          </div>
+          <div class="rd-tmpl-card">
+            <div class="rd-tmpl-icon" style="background:#FBEAF0"><i class="ti ti-users" style="color:#993556;font-size:18px" aria-hidden="true"></i></div>
+            <div class="rd-tmpl-name">STAR Method</div>
+            <div class="rd-tmpl-desc">Structure behavioral answers using STAR framework</div>
+            <div class="rd-tmpl-tags"><span class="rd-tmpl-tag tag-hr">HR / Behavioral</span><span class="rd-tmpl-tag tag-easy">Easy</span></div>
+            <button class="rd-use-btn" onclick="switchScreen('recall')">Use template</button>
+          </div>
+          <div class="rd-tmpl-card">
+            <div class="rd-tmpl-icon" style="background:#E6F1FB"><i class="ti ti-search" style="color:#185FA5;font-size:18px" aria-hidden="true"></i></div>
+            <div class="rd-tmpl-name">Binary Search</div>
+            <div class="rd-tmpl-desc">Binary search and its variations with edge cases</div>
+            <div class="rd-tmpl-tags"><span class="rd-tmpl-tag tag-dsa">DSA</span><span class="rd-tmpl-tag tag-easy">Easy</span></div>
+            <button class="rd-use-btn" onclick="switchScreen('recall')">Use template</button>
+          </div>
+        </div>
+        <div class="rd-action-row">
+          <button class="rd-action-btn" onclick="sendPrompt('Generate a recall template for Raft protocol with mental model, execution flow, edge cases and recall questions')"><i class="ti ti-sparkles" style="font-size:13px" aria-hidden="true"></i> AI generate Raft template ↗</button>
+          <button class="rd-action-btn" onclick="sendPrompt('Generate a recall template for PostgreSQL MVCC internals')"><i class="ti ti-database" style="font-size:13px" aria-hidden="true"></i> AI generate MVCC template ↗</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+var timerInterval = null;
+var timerSeconds = 0;
+
+function switchScreen(id) {
+  document.querySelectorAll('.rd-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  if (id === 'recall') startTimer();
+  else stopTimer();
+}
+
+function nav(el, screenId) {
+  document.querySelectorAll('.rd-nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  switchScreen(screenId);
+}
+
+function ptab(btn) {
+  document.querySelectorAll('.rd-ptab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function revealAnswer(el) {
+  el.classList.add('revealed');
+  document.getElementById('recall-hint-text').style.display = 'none';
+  document.getElementById('recall-revealed').style.display = 'block';
+  document.getElementById('recall-hint').style.display = 'none';
+}
+
+function rateRecall(btn, rating) {
+  document.querySelectorAll('.rd-rate-btn').forEach(b => b.style.opacity = '0.4');
+  btn.style.opacity = '1';
+  btn.style.fontWeight = '500';
+  var acc = document.getElementById('accuracy-val');
+  var scores = {forgot:20, hard:50, medium:70, easy:95};
+  acc.textContent = Math.round(scores[rating]) + '%';
+}
+
+function startTimer() {
+  stopTimer();
+  timerSeconds = 0;
+  timerInterval = setInterval(function() {
+    timerSeconds++;
+    var m = Math.floor(timerSeconds/60).toString().padStart(2,'0');
+    var s = (timerSeconds%60).toString().padStart(2,'0');
+    var el = document.getElementById('recall-timer');
+    if (el) el.textContent = m + ':' + s;
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+</script>

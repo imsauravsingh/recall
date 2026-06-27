@@ -1,5 +1,5 @@
 const Panel = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-[1.75rem] border border-slate-800 bg-slate-950/75 p-6 shadow-soft">
+  <div className="rounded-lg border border-[#dddbe7] bg-white p-4 shadow-soft dark:border-[#292735] dark:bg-[#1a1a23]">
     {children}
   </div>
 );

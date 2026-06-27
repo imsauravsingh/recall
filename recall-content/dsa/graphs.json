@@ -1,0 +1,6 @@
+{
+  "module": "dsa",
+  "topic": "graphs",
+  "description": "Graph algorithms, connectivity, and shortest-path interview questions.",
+  "patterns": ["BFS / DFS", "topological sort", "union find", "shortest path"]
+}

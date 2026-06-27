@@ -1,0 +1,18 @@
+{
+  "module": "system-design",
+  "level": "intermediate",
+  "topics": [
+    {
+      "title": "Cache Invalidation",
+      "summary": "Explore cache coherence models, TTL strategies, and stale data handling."
+    },
+    {
+      "title": "Data Partitioning",
+      "summary": "Design sharding and partitioning schemes for high-volume services."
+    },
+    {
+      "title": "Pub/Sub Architecture",
+      "summary": "Learn decoupled messaging, event-driven design, and scaling approaches."
+    }
+  ]
+}

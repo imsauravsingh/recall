@@ -1,0 +1,14 @@
+{
+  "module": "cloud",
+  "provider": "aws",
+  "topics": [
+    {
+      "title": "VPC Design",
+      "summary": "Understand network segmentation, subnets, and security groups in AWS."
+    },
+    {
+      "title": "S3 Storage",
+      "summary": "Review S3 durability, data lifecycle, and storage classes."
+    }
+  ]
+}

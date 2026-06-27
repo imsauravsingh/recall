@@ -1,0 +1,14 @@
+{
+  "module": "ai",
+  "topic": "rag",
+  "topics": [
+    {
+      "title": "Retrieval Augmented Generation",
+      "summary": "Understand the architecture of retrieval systems combined with generative models."
+    },
+    {
+      "title": "Embedding Stores",
+      "summary": "Review vector stores, similarity search, and relevance scoring."
+    }
+  ]
+}

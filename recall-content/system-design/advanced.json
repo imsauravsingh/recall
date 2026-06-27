@@ -1,0 +1,18 @@
+{
+  "module": "system-design",
+  "level": "advanced",
+  "topics": [
+    {
+      "title": "Distributed Consensus",
+      "summary": "Compare Raft, Paxos, and leader election tradeoffs in large systems."
+    },
+    {
+      "title": "Eventual Consistency",
+      "summary": "Design systems that tolerate lagging replicas and reconcile updates."
+    },
+    {
+      "title": "Global Data Replication",
+      "summary": "Explore multi-region replication, conflict resolution, and failover."
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "title": "90-Day Study Plan - Foundation Month",
+  "description": "Focus on pattern recognition, backend fundamentals, system design building blocks, and structured recall notes.",
+  "dailySchedule": [
+    {
+      "time": "Morning",
+      "duration": "1 hour",
+      "blocks": ["45 min DSA", "15 min Recall Revision"],
+      "focus": [
+        "Pattern recognition",
+        "Understand patterns",
+        "Avoid solving random volume"
+      ]
+    },
+    {
+      "time": "Evening",
+      "duration": "2 hours",
+      "blocks": ["1 hour System Design / Backend", "1 hour Deep Topic"],
+      "focus": [
+        "Kafka",
+        "PostgreSQL",
+        "Redis",
+        "Distributed Systems",
+        "JVM",
+        "Cloud"
+      ]
+    }
+  ],
+  "weeks": [
+    {
+      "week": "Week 1",
+      "goal": "Build the base: arrays, REST, traffic entry points, and resume recall.",
+      "sections": [
+        {
+          "title": "DSA",
+          "items": [
+            "Arrays",
+            "Two Sum",
+            "Best Time To Buy Stock",
+            "Contains Duplicate",
+            "Product Except Self",
+            "Move Zeroes"
+          ]
+        },
+        {
+          "title": "Recall Topics",
+          "items": ["Array Pattern", "HashMap Pattern", "Complexity Analysis"]
+        },
+        {
+          "title": "Backend",
+          "items": [
+            "REST API Design",
+            "Pagination",
+            "Versioning",
+            "Idempotency"
+          ]
+        },
+        {
+          "title": "System Design",
+          "items": ["Load Balancer", "CDN", "API Gateway"]
+        },
+        {
+          "title": "Resume Recall",
+          "items": [
+            "IoT Platform",
+            "AWS Cost Optimization",
+            "Performance Improvement"
+          ]
+        }
+      ]
+    },
+    {
+      "week": "Week 2",
+      "goal": "Recognize window/two-pointer patterns and explain auth plus cache design.",
+      "sections": [
+        {
+          "title": "DSA",
+          "items": [
+            "Sliding Window",
+            "Maximum Sum Subarray",
+            "Longest Substring",
+            "Permutation In String",
+            "Two Pointer",
+            "Container With Most Water",
+            "Valid Palindrome"
+          ]
+        },
+        {
+          "title": "Backend",
+          "items": ["JWT", "OAuth2", "Authentication", "Authorization"]
+        },
+        {
+          "title": "System Design",
+          "items": ["Cache", "Redis", "Cache Aside", "Write Through"]
+        }
+      ]
+    },
+    {
+      "week": "Week 3",
+      "goal": "Connect stack/queue recall with Redis internals and rate limiter design.",
+      "sections": [
+        {
+          "title": "DSA",
+          "items": [
+            "Stack",
+            "Valid Parentheses",
+            "Min Stack",
+            "Max Stack",
+            "Queue",
+            "Sliding Window Maximum"
+          ]
+        },
+        {
+          "title": "Backend",
+          "items": ["Redis Internals", "TTL", "PubSub", "Distributed Lock"]
+        },
+        { "title": "System Design", "items": ["Rate Limiter"] },
+        {
+          "title": "Recall Notes",
+          "items": ["Mental Model", "Flow", "Tradeoffs", "Failure Cases"]
+        }
+      ]
+    },
+    {
+      "week": "Week 4",
+      "goal": "Finish month one with linked lists, database fundamentals, and notification design.",
+      "sections": [
+        {
+          "title": "DSA",
+          "items": [
+            "Linked List",
+            "Reverse Linked List",
+            "Cycle Detection",
+            "Merge Lists",
+            "LRU Foundation"
+          ]
+        },
+        {
+          "title": "Database",
+          "items": ["Indexes", "Transactions", "Isolation Levels", "MVCC"]
+        },
+        { "title": "System Design", "items": ["Notification Service"] }
+      ]
+    }
+  ],
+  "monthlyGoals": [
+    "Redis",
+    "JWT",
+    "Rate Limiter",
+    "REST",
+    "Database Indexes",
+    "Arrays",
+    "Sliding Window",
+    "Stack",
+    "Linked List"
+  ],
+  "recallNoteSections": ["Mental Model", "Flow", "Tradeoffs", "Failure Cases"]
+}

@@ -1,0 +1,11 @@
+{
+  "module": "dsa",
+  "topic": "trees",
+  "description": "Tree traversal techniques, recursion, and common tree-based interview challenges.",
+  "patterns": [
+    "DFS / BFS",
+    "tree depth",
+    "binary search tree",
+    "tree balancing"
+  ]
+}

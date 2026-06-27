@@ -1,0 +1,14 @@
+{
+  "module": "databases",
+  "database": "mysql",
+  "topics": [
+    {
+      "title": "Indexes",
+      "summary": "Learn how indexes work and when to use composite indexes for query speed."
+    },
+    {
+      "title": "Transactions",
+      "summary": "Understand ACID guarantees and transaction isolation levels in MySQL."
+    }
+  ]
+}

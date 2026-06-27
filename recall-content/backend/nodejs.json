@@ -1,0 +1,14 @@
+{
+  "module": "backend",
+  "framework": "nodejs",
+  "topics": [
+    {
+      "title": "Event Loop",
+      "summary": "Understand how Node processes requests asynchronously and manages concurrency."
+    },
+    {
+      "title": "Streams",
+      "summary": "Learn readable and writable streams for efficient large-data processing."
+    }
+  ]
+}

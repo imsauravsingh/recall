@@ -11,6 +11,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@clerk/react": "^6.11.1",
     "clsx": "^2.1.1",
     "dexie": "^4.4.3",
     "react": "^18.3.1",
@@ -19,14 +20,15 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@hookform/resolvers": "^3.4.0",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@hookform/resolvers": "^3.4.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.19",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^23.0.0",
     "postcss": "^8.4.37",
     "react-hook-form": "^7.48.0",

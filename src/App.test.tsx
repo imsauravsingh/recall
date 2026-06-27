@@ -9,7 +9,7 @@ test('renders dashboard navigation', () => {
     </MemoryRouter>,
   );
 
-  expect(screen.getByText(/Developer memory workspace/i)).toBeInTheDocument();
+  expect(screen.getByText(/Good morning, Saurav/i)).toBeInTheDocument();
   expect(screen.getByText(/Total topics/i)).toBeInTheDocument();
-  expect(screen.getByText(/Your current study baseline/i)).toBeInTheDocument();
+  expect(screen.getByText(/Interview rounds overview/i)).toBeInTheDocument();
 });

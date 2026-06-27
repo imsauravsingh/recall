@@ -1,0 +1,14 @@
+{
+  "module": "backend",
+  "framework": "express",
+  "topics": [
+    {
+      "title": "Middleware",
+      "summary": "Review request lifecycle and how middleware composes behavior in Express."
+    },
+    {
+      "title": "Error Handling",
+      "summary": "Learn patterns for centralized error handling and response formatting."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "module": "ai",
+  "topic": "llm",
+  "topics": [
+    {
+      "title": "Prompt Engineering",
+      "summary": "Learn how to craft prompts for robust and reliable language model responses."
+    },
+    {
+      "title": "Model Selection",
+      "summary": "Understand tradeoffs between open-source and hosted large language models."
+    }
+  ]
+}

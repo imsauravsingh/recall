@@ -1,0 +1,14 @@
+{
+  "module": "databases",
+  "database": "mongodb",
+  "topics": [
+    {
+      "title": "Document Modeling",
+      "summary": "Review schema design approaches for embedded documents and references."
+    },
+    {
+      "title": "Replication",
+      "summary": "Learn replication sets, failover, and distributed consistency tradeoffs."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "module": "system-design",
+  "level": "beginner",
+  "topics": [
+    {
+      "title": "Load Balancer",
+      "summary": "Understand traffic distribution, health checks, and scalability patterns."
+    },
+    {
+      "title": "CDN Basics",
+      "summary": "Learn how CDNs cache content and reduce latency for global users."
+    },
+    {
+      "title": "API Gateway",
+      "summary": "Review request routing, authentication, and API versioning strategies."
+    }
+  ]
+}

@@ -1,0 +1,529 @@
+
+<h2 class="sr-only">Recall.dev mobile app — full-screen phone UI with bottom navigation, Dashboard, DSA patterns, Recall Mode, Queue, and Templates screens.</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+.phone-wrap{display:flex;justify-content:center;padding:16px 0;background:var(--color-background-tertiary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary)}
+.phone{width:360px;background:var(--color-background-primary);border-radius:24px;border:0.5px solid var(--color-border-secondary);overflow:hidden;display:flex;flex-direction:column}
+.status-bar{background:#534AB7;padding:10px 16px 8px;display:flex;align-items:center;justify-content:space-between}
+.sb-logo{display:flex;align-items:center;gap:6px}
+.sb-logo-box{width:22px;height:22px;background:rgba(255,255,255,0.2);border-radius:5px;display:flex;align-items:center;justify-content:center}
+.sb-name{font-size:13px;font-weight:500;color:#fff}
+.sb-right{display:flex;align-items:center;gap:10px}
+.sb-streak{background:rgba(255,255,255,0.2);border-radius:10px;padding:2px 8px;font-size:11px;color:#fff;display:flex;align-items:center;gap:3px}
+.sb-avatar{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#fff}
+
+.screen{display:none;flex:1;overflow-y:auto;padding:12px}
+.screen.active{display:block}
+
+.sec-label{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin:0 0 8px}
+
+.metrics-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px}
+.metric-val{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1}
+.metric-lbl{font-size:10px;color:var(--color-text-secondary);margin-top:3px}
+.metric-sub{font-size:10px;color:var(--color-text-tertiary);margin-top:1px}
+
+.hero-recall{background:#EEEDFE;border-radius:var(--border-radius-lg);padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.hero-recall-left{}
+.hero-recall-title{font-size:14px;font-weight:500;color:#26215C;margin-bottom:2px}
+.hero-recall-sub{font-size:11px;color:#534AB7}
+.hero-recall-btn{background:#534AB7;color:#fff;border:none;border-radius:var(--border-radius-md);padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.hero-recall-btn:active{background:#3C3489}
+
+.round-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.round-scroll::-webkit-scrollbar{display:none}
+.round-chip{flex-shrink:0;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 12px;min-width:110px;cursor:pointer}
+.round-chip:active{background:var(--color-background-secondary)}
+.round-chip-icon{font-size:16px;margin-bottom:4px}
+.round-chip-name{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.round-chip-pct{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.mini-bar{height:3px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden}
+.mini-fill{height:100%;border-radius:2px}
+
+.queue-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:12px}
+.queue-card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.queue-card-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.queue-view-all{font-size:11px;color:#534AB7;cursor:pointer}
+.queue-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.queue-item:last-child{border-bottom:none}
+.qi-name{font-size:12px;color:var(--color-text-primary);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qi-tag{font-size:10px;padding:2px 6px;border-radius:10px;background:#EEEDFE;color:#3C3489;flex-shrink:0}
+.qi-due{font-size:10px;font-weight:500;flex-shrink:0}
+.due-now{color:#A32D2D}
+.due-soon{color:#854F0B}
+.due-ok{color:#0F6E56}
+
+.btn-primary{background:#534AB7;color:#fff;border:none;border-radius:var(--border-radius-md);padding:12px 0;font-size:13px;font-weight:500;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary:active{background:#3C3489}
+.btn-outline{background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 0;font-size:12px;font-weight:400;cursor:pointer;width:100%;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-outline:active{background:var(--color-background-secondary)}
+.btn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+
+.pattern-item{display:flex;align-items:center;gap:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;cursor:pointer}
+.pattern-item:active{background:var(--color-background-secondary)}
+.pi-icon{width:36px;height:36px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.pi-info{flex:1;min-width:0}
+.pi-name{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:1px}
+.pi-sub{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.pi-bar{height:3px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden;width:100%}
+.pi-bar-fill{height:100%;border-radius:2px}
+.pi-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.conf-pill{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.conf-s{background:#EAF3DE;color:#27500A}
+.conf-m{background:#FAEEDA;color:#633806}
+.conf-w{background:#FCEBEB;color:#A32D2D}
+.pi-topics{font-size:10px;color:var(--color-text-tertiary)}
+
+.ptabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab{flex-shrink:0;background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--color-text-secondary);cursor:pointer}
+.ptab.act{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;font-weight:500}
+
+.recall-topic-bar{background:#534AB7;border-radius:var(--border-radius-lg);padding:12px;margin-bottom:10px}
+.rtb-title{font-size:14px;font-weight:500;color:#fff;margin-bottom:2px}
+.rtb-sub{font-size:11px;color:#AFA9EC;margin-bottom:8px}
+.rtb-timer{font-size:11px;color:#CECBF6;display:flex;align-items:center;gap:4px}
+
+.step-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.step-row::-webkit-scrollbar{display:none}
+.step-pill{flex-shrink:0;display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:500;border:0.5px solid var(--color-border-tertiary)}
+.step-pill.done{background:#EAF3DE;color:#27500A;border-color:#97C459}
+.step-pill.cur{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.step-pill.pend{color:var(--color-text-tertiary)}
+
+.recall-q-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:10px}
+.rq-label{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:6px}
+.rq-question{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px;line-height:1.4}
+.rq-tap{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:14px;min-height:90px;cursor:pointer;font-size:12px;color:var(--color-text-tertiary);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.5}
+.rq-tap.open{background:#EAF3DE;border-color:#5DCAA5;color:#085041;font-family:var(--font-mono);font-size:11px;align-items:flex-start;text-align:left;line-height:1.7}
+.rq-rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+.rate-btn{padding:10px 0;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);font-size:12px;font-weight:500;cursor:pointer;background:transparent;text-align:center}
+.rate-btn:active{opacity:0.7}
+.rb-forgot{color:#A32D2D;border-color:#F09595}
+.rb-hard{color:#854F0B;border-color:#EF9F27}
+.rb-medium{color:#185FA5;border-color:#85B7EB}
+.rb-easy{color:#0F6E56;border-color:#5DCAA5}
+
+.tmpl-item{display:flex;align-items:center;gap:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;cursor:pointer}
+.tmpl-item:active{background:var(--color-background-secondary)}
+.tmpl-icon{width:38px;height:38px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.tmpl-info{flex:1;min-width:0}
+.tmpl-name{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.tmpl-desc{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.tmpl-tags{display:flex;gap:4px}
+.tt{font-size:10px;padding:2px 6px;border-radius:10px}
+.tt-dsa{background:#E6F1FB;color:#0C447C}
+.tt-sd{background:#FAEEDA;color:#633806}
+.tt-be{background:#E1F5EE;color:#085041}
+.tt-ai{background:#EEEDFE;color:#3C3489}
+.tt-hr{background:#FBEAF0;color:#72243E}
+.tt-easy{background:#EAF3DE;color:#27500A}
+.tt-med{background:#FAEEDA;color:#633806}
+.tt-hard{background:#FCEBEB;color:#A32D2D}
+.use-mini{background:#534AB7;color:#fff;border:none;border-radius:var(--border-radius-md);padding:7px 12px;font-size:11px;font-weight:500;cursor:pointer;flex-shrink:0}
+.use-mini:active{background:#3C3489}
+
+.bottom-nav{display:flex;background:var(--color-background-primary);border-top:0.5px solid var(--color-border-tertiary);padding:6px 0 8px}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;border:none;background:transparent}
+.bn-item:active{opacity:0.6}
+.bn-icon{font-size:20px;color:var(--color-text-tertiary)}
+.bn-label{font-size:10px;color:var(--color-text-tertiary)}
+.bn-item.act .bn-icon{color:#534AB7}
+.bn-item.act .bn-label{color:#534AB7;font-weight:500}
+.bn-badge{background:#E24B4A;color:#fff;font-size:9px;padding:1px 4px;border-radius:8px;min-width:14px;text-align:center;margin-top:-4px;margin-bottom:2px;display:none}
+.bn-item.has-badge .bn-badge{display:block}
+
+.ai-strip{background:#FAEEDA;border-radius:var(--border-radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ai-strip-text{font-size:12px;color:#633806}
+.ai-strip-btn{font-size:11px;font-weight:500;color:#534AB7;background:transparent;border:none;cursor:pointer}
+
+@media(prefers-color-scheme:dark){
+.status-bar{background:#3C3489}
+.hero-recall{background:#26215C}
+.hero-recall-title{color:#CECBF6}
+.hero-recall-sub{color:#AFA9EC}
+.hero-recall-btn{background:#7F77DD}
+.qi-tag{background:#26215C;color:#CECBF6}
+.recall-topic-bar{background:#3C3489}
+.step-pill.done{background:#085041;color:#9FE1CB;border-color:#1D9E75}
+.step-pill.cur{background:#26215C;color:#CECBF6;border-color:#534AB7}
+.rq-tap.open{background:#085041;border-color:#1D9E75;color:#9FE1CB}
+.use-mini{background:#534AB7}
+.ai-strip{background:#412402}
+.ai-strip-text{color:#FAC775}
+.conf-s{background:#085041;color:#9FE1CB}
+.conf-m{background:#412402;color:#FAC775}
+.conf-w{background:#501313;color:#F09595}
+.pattern-item,.round-chip,.queue-card,.recall-q-card,.tmpl-item{background:var(--color-background-secondary)}
+.tt-dsa{background:#042C53;color:#B5D4F4}
+.tt-sd{background:#412402;color:#FAC775}
+.tt-be{background:#04342C;color:#9FE1CB}
+.tt-ai{background:#26215C;color:#CECBF6}
+.tt-hr{background:#4B1528;color:#F4C0D1}
+.tt-easy{background:#085041;color:#9FE1CB}
+.tt-med{background:#412402;color:#FAC775}
+.tt-hard{background:#501313;color:#F09595}
+}
+</style>
+
+<div class="phone-wrap">
+<div class="phone">
+
+  <div class="status-bar">
+    <div class="sb-logo">
+      <div class="sb-logo-box"><i class="ti ti-brain" style="font-size:13px;color:#fff" aria-hidden="true"></i></div>
+      <span class="sb-name">Recall.dev</span>
+    </div>
+    <div class="sb-right">
+      <div class="sb-streak"><i class="ti ti-flame" style="font-size:12px" aria-hidden="true"></i> 7 days</div>
+      <div class="sb-avatar">SS</div>
+    </div>
+  </div>
+
+  <div id="sc-home" class="screen active" style="padding-bottom:4px">
+    <div style="margin-bottom:10px">
+      <div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">Good morning, Saurav</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Week 3 of 12 · 7 topics due today</div>
+    </div>
+
+    <div class="hero-recall">
+      <div class="hero-recall-left">
+        <div class="hero-recall-title"><i class="ti ti-brain" style="font-size:13px" aria-hidden="true"></i> Start recall session</div>
+        <div class="hero-recall-sub">Raft Protocol is due today</div>
+      </div>
+      <button class="hero-recall-btn" onclick="goScreen('sc-recall')">Start</button>
+    </div>
+
+    <div class="metrics-2">
+      <div class="metric-card"><div class="metric-val">128</div><div class="metric-lbl">Total topics</div><div class="metric-sub">+12 this week</div></div>
+      <div class="metric-card"><div class="metric-val">68%</div><div class="metric-lbl">Readiness</div><div class="metric-sub">Staff Engineer</div></div>
+    </div>
+
+    <div class="sec-label">Interview rounds</div>
+    <div class="round-scroll">
+      <div class="round-chip" onclick="goScreen('sc-dsa')">
+        <div class="round-chip-icon"><i class="ti ti-code" style="color:#185FA5" aria-hidden="true"></i></div>
+        <div class="round-chip-name">DSA</div>
+        <div class="round-chip-pct">62% · 84 topics</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:62%;background:#378ADD"></div></div>
+      </div>
+      <div class="round-chip" onclick="goScreen('sc-dsa')">
+        <div class="round-chip-icon"><i class="ti ti-topology-star" style="color:#1D9E75" aria-hidden="true"></i></div>
+        <div class="round-chip-name">System Design</div>
+        <div class="round-chip-pct">82% · 36 topics</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:82%;background:#1D9E75"></div></div>
+      </div>
+      <div class="round-chip" onclick="goScreen('sc-dsa')">
+        <div class="round-chip-icon"><i class="ti ti-server" style="color:#7F77DD" aria-hidden="true"></i></div>
+        <div class="round-chip-name">Backend</div>
+        <div class="round-chip-pct">65% · 42 topics</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:65%;background:#7F77DD"></div></div>
+      </div>
+      <div class="round-chip" onclick="goScreen('sc-dsa')">
+        <div class="round-chip-icon"><i class="ti ti-robot" style="color:#D85A30" aria-hidden="true"></i></div>
+        <div class="round-chip-name">AI Rounds</div>
+        <div class="round-chip-pct">65% · 22 topics</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:65%;background:#D85A30"></div></div>
+      </div>
+      <div class="round-chip" onclick="goScreen('sc-dsa')">
+        <div class="round-chip-icon"><i class="ti ti-users" style="color:#D4537E" aria-hidden="true"></i></div>
+        <div class="round-chip-name">Behavioral</div>
+        <div class="round-chip-pct">60% · 18 topics</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:60%;background:#D4537E"></div></div>
+      </div>
+    </div>
+
+    <div class="queue-card">
+      <div class="queue-card-header">
+        <span class="queue-card-title">Recall Queue (7)</span>
+        <span class="queue-view-all" onclick="goScreen('sc-queue')">View all</span>
+      </div>
+      <div class="queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Raft Protocol</span><span class="qi-tag">Dist</span><span class="qi-due due-now">Today</span></div>
+      <div class="queue-item"><i class="ti ti-database" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">PostgreSQL MVCC</span><span class="qi-tag">Backend</span><span class="qi-due due-soon">1 day</span></div>
+      <div class="queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Sliding Window</span><span class="qi-tag">DSA</span><span class="qi-due due-soon">2 days</span></div>
+      <div class="queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Consistent Hashing</span><span class="qi-tag">SD</span><span class="qi-due due-ok">3 days</span></div>
+    </div>
+
+    <div class="ai-strip">
+      <span class="ai-strip-text"><i class="ti ti-sparkles" style="font-size:13px" aria-hidden="true"></i> AI: You haven't revised Kafka in 7 days</span>
+      <button class="ai-strip-btn" onclick="sendPrompt('Quiz me on Kafka Consumer Groups now')">Recall ↗</button>
+    </div>
+  </div>
+
+  <div id="sc-dsa" class="screen" style="padding-bottom:4px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn-outline" style="width:auto;padding:6px 10px;font-size:12px" onclick="goScreen('sc-home')"><i class="ti ti-arrow-left" style="font-size:14px" aria-hidden="true"></i></button>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">DSA</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">84 topics · 62% overall recall</div>
+      </div>
+    </div>
+
+    <div class="metrics-2" style="margin-bottom:10px">
+      <div class="metric-card"><div class="metric-val">32</div><div class="metric-lbl">Strong</div><div class="metric-sub">Recall ≥ 70%</div></div>
+      <div class="metric-card"><div class="metric-val">18</div><div class="metric-lbl">Weak</div><div class="metric-sub">Recall &lt; 40%</div></div>
+    </div>
+
+    <div class="ptabs">
+      <button class="ptab act" onclick="ptab(this)">All</button>
+      <button class="ptab" onclick="ptab(this)">Arrays</button>
+      <button class="ptab" onclick="ptab(this)">Sliding Window</button>
+      <button class="ptab" onclick="ptab(this)">Heaps</button>
+      <button class="ptab" onclick="ptab(this)">Graphs</button>
+      <button class="ptab" onclick="ptab(this)">DP</button>
+    </div>
+
+    <div class="pattern-item" onclick="goScreen('sc-recall')">
+      <div class="pi-icon" style="background:#E6F1FB"><i class="ti ti-brackets" style="color:#185FA5;font-size:16px" aria-hidden="true"></i></div>
+      <div class="pi-info">
+        <div class="pi-name">Arrays &amp; Hashing</div>
+        <div class="pi-sub">Hash tables · Prefix sum</div>
+        <div class="pi-bar"><div class="pi-bar-fill" style="width:75%;background:#1D9E75"></div></div>
+      </div>
+      <div class="pi-right"><span class="conf-pill conf-s">75%</span><span class="pi-topics">12 topics</span></div>
+    </div>
+    <div class="pattern-item" onclick="goScreen('sc-recall')">
+      <div class="pi-icon" style="background:#E6F1FB"><i class="ti ti-maximize" style="color:#185FA5;font-size:16px" aria-hidden="true"></i></div>
+      <div class="pi-info">
+        <div class="pi-name">Sliding Window</div>
+        <div class="pi-sub">Fixed · Variable window</div>
+        <div class="pi-bar"><div class="pi-bar-fill" style="width:80%;background:#1D9E75"></div></div>
+      </div>
+      <div class="pi-right"><span class="conf-pill conf-s">80%</span><span class="pi-topics">10 topics</span></div>
+    </div>
+    <div class="pattern-item" onclick="goScreen('sc-recall')">
+      <div class="pi-icon" style="background:#FAEEDA"><i class="ti ti-stack" style="color:#854F0B;font-size:16px" aria-hidden="true"></i></div>
+      <div class="pi-info">
+        <div class="pi-name">Heaps</div>
+        <div class="pi-sub">Top K · Merge K lists</div>
+        <div class="pi-bar"><div class="pi-bar-fill" style="width:60%;background:#BA7517"></div></div>
+      </div>
+      <div class="pi-right"><span class="conf-pill conf-m">60%</span><span class="pi-topics">8 topics</span></div>
+    </div>
+    <div class="pattern-item" onclick="goScreen('sc-recall')">
+      <div class="pi-icon" style="background:#FCEBEB"><i class="ti ti-circles-relation" style="color:#A32D2D;font-size:16px" aria-hidden="true"></i></div>
+      <div class="pi-info">
+        <div class="pi-name">Graphs</div>
+        <div class="pi-sub">BFS · DFS · Topo sort</div>
+        <div class="pi-bar"><div class="pi-bar-fill" style="width:45%;background:#E24B4A"></div></div>
+      </div>
+      <div class="pi-right"><span class="conf-pill conf-w">45%</span><span class="pi-topics">11 topics</span></div>
+    </div>
+    <div class="pattern-item" onclick="goScreen('sc-recall')">
+      <div class="pi-icon" style="background:#FCEBEB"><i class="ti ti-chart-dots" style="color:#A32D2D;font-size:16px" aria-hidden="true"></i></div>
+      <div class="pi-info">
+        <div class="pi-name">Dynamic Programming</div>
+        <div class="pi-sub">1D DP · 2D DP · Knapsack</div>
+        <div class="pi-bar"><div class="pi-bar-fill" style="width:40%;background:#E24B4A"></div></div>
+      </div>
+      <div class="pi-right"><span class="conf-pill conf-w">40%</span><span class="pi-topics">15 topics</span></div>
+    </div>
+
+    <button class="btn-primary" style="margin-top:10px" onclick="goScreen('sc-recall')"><i class="ti ti-player-play" style="font-size:14px" aria-hidden="true"></i> Start Recall Mode</button>
+  </div>
+
+  <div id="sc-recall" class="screen" style="padding-bottom:4px">
+    <div class="recall-topic-bar">
+      <div class="rtb-title">Recall Mode — Sliding Window</div>
+      <div class="rtb-sub">Tap to recall · then reveal · then rate</div>
+      <div class="rtb-timer"><i class="ti ti-clock" style="font-size:12px" aria-hidden="true"></i> <span id="m-timer">00:00</span> · 3 of 7 done</div>
+    </div>
+
+    <div class="step-row">
+      <div class="step-pill done"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i> Mental Model</div>
+      <div class="step-pill done"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i> Approach</div>
+      <div class="step-pill cur">Code Structure</div>
+      <div class="step-pill pend">Edge Cases</div>
+      <div class="step-pill pend">Complexity</div>
+      <div class="step-pill pend">Mistakes</div>
+    </div>
+
+    <div class="recall-q-card">
+      <div class="rq-label">Step 3 of 6 · Code structure</div>
+      <div class="rq-question">Write the sliding window template from memory — variable window variant</div>
+      <div class="rq-tap" id="m-answer" onclick="revealM(this)">
+        <div id="m-hint"><i class="ti ti-eye" style="font-size:16px;display:block;margin-bottom:6px" aria-hidden="true"></i>Try to recall first<br>then tap to reveal</div>
+        <div id="m-code" style="display:none">
+          int l=0, max=0;<br>
+          Map&lt;C,I&gt; win = new HashMap&lt;&gt;();<br><br>
+          for(int r=0;r&lt;n;r++){<br>
+          &nbsp;win.merge(s[r],1,I::sum);<br>
+          &nbsp;while(win.size()&gt;k){<br>
+          &nbsp;&nbsp;win.merge(s[l],-1,I::sum);<br>
+          &nbsp;&nbsp;if(win.get(s[l])==0)<br>
+          &nbsp;&nbsp;&nbsp;win.remove(s[l]);<br>
+          &nbsp;&nbsp;l++;<br>
+          &nbsp;}<br>
+          &nbsp;max=Math.max(max,r-l+1);<br>
+          }
+        </div>
+      </div>
+      <div class="rq-rate-grid">
+        <button class="rate-btn rb-forgot" onclick="rateM(this,20)">Forgot</button>
+        <button class="rate-btn rb-hard" onclick="rateM(this,50)">Hard</button>
+        <button class="rate-btn rb-medium" onclick="rateM(this,75)">Medium</button>
+        <button class="rate-btn rb-easy" onclick="rateM(this,95)">Easy</button>
+      </div>
+    </div>
+
+    <div class="metrics-2">
+      <div class="metric-card"><div class="metric-val" id="m-acc">68%</div><div class="metric-lbl">Session accuracy</div></div>
+      <div class="metric-card"><div class="metric-val">3 days</div><div class="metric-lbl">Longest streak</div></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-outline" onclick="goScreen('sc-dsa')"><i class="ti ti-arrow-left" style="font-size:13px" aria-hidden="true"></i> Back</button>
+      <button class="btn-outline" onclick="sendPrompt('Generate 3 more sliding window recall questions — hard level')"><i class="ti ti-plus" style="font-size:13px" aria-hidden="true"></i> More ↗</button>
+    </div>
+  </div>
+
+  <div id="sc-queue" class="screen" style="padding-bottom:4px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn-outline" style="width:auto;padding:6px 10px" onclick="goScreen('sc-home')"><i class="ti ti-arrow-left" style="font-size:14px" aria-hidden="true"></i></button>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">Recall Queue</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">7 topics due for revision</div>
+      </div>
+    </div>
+    <div class="queue-card" style="margin-bottom:0">
+      <div class="queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Raft Protocol</span><span class="qi-tag">Dist</span><span class="qi-due due-now">Today</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+      <div class="queue-item"><i class="ti ti-database" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">PostgreSQL MVCC</span><span class="qi-tag">BE</span><span class="qi-due due-soon">1 day</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+      <div class="queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Sliding Window</span><span class="qi-tag">DSA</span><span class="qi-due due-soon">2 days</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+      <div class="queue-item"><i class="ti ti-topology-star" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Consistent Hashing</span><span class="qi-tag">SD</span><span class="qi-due due-ok">3 days</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+      <div class="queue-item"><i class="ti ti-robot" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">RAG Architecture</span><span class="qi-tag">AI</span><span class="qi-due due-ok">4 days</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+      <div class="queue-item"><i class="ti ti-code" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Dynamic Programming</span><span class="qi-tag">DSA</span><span class="qi-due due-ok">5 days</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+      <div class="queue-item"><i class="ti ti-users" style="font-size:13px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span class="qi-name">Leadership conflict story</span><span class="qi-tag">HR</span><span class="qi-due due-ok">5 days</span><button class="use-mini" style="margin-left:auto;padding:5px 10px" onclick="goScreen('sc-recall')">Recall</button></div>
+    </div>
+  </div>
+
+  <div id="sc-templates" class="screen" style="padding-bottom:4px">
+    <div style="margin-bottom:12px">
+      <div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">Templates</div>
+      <div style="font-size:11px;color:var(--color-text-secondary)">Pick one to create your recall workspace</div>
+    </div>
+    <div class="tmpl-item" onclick="goScreen('sc-recall')">
+      <div class="tmpl-icon" style="background:#E6F1FB"><i class="ti ti-maximize" style="color:#185FA5;font-size:18px" aria-hidden="true"></i></div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">Sliding Window</div>
+        <div class="tmpl-desc">All patterns and variations</div>
+        <div class="tmpl-tags"><span class="tt tt-dsa">DSA</span><span class="tt tt-med">Medium</span></div>
+      </div>
+      <button class="use-mini" onclick="goScreen('sc-recall')">Use</button>
+    </div>
+    <div class="tmpl-item" onclick="goScreen('sc-recall')">
+      <div class="tmpl-icon" style="background:#FAEEDA"><i class="ti ti-topology-star" style="color:#854F0B;font-size:18px" aria-hidden="true"></i></div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">Rate Limiter</div>
+        <div class="tmpl-desc">Scalable rate limiting design</div>
+        <div class="tmpl-tags"><span class="tt tt-sd">System Design</span><span class="tt tt-med">Medium</span></div>
+      </div>
+      <button class="use-mini" onclick="goScreen('sc-recall')">Use</button>
+    </div>
+    <div class="tmpl-item" onclick="goScreen('sc-recall')">
+      <div class="tmpl-icon" style="background:#E1F5EE"><i class="ti ti-server" style="color:#0F6E56;font-size:18px" aria-hidden="true"></i></div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">Kafka Consumer Groups</div>
+        <div class="tmpl-desc">Offsets, rebalancing, internals</div>
+        <div class="tmpl-tags"><span class="tt tt-be">Backend</span><span class="tt tt-med">Medium</span></div>
+      </div>
+      <button class="use-mini" onclick="goScreen('sc-recall')">Use</button>
+    </div>
+    <div class="tmpl-item" onclick="goScreen('sc-recall')">
+      <div class="tmpl-icon" style="background:#EEEDFE"><i class="ti ti-robot" style="color:#534AB7;font-size:18px" aria-hidden="true"></i></div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">RAG Architecture</div>
+        <div class="tmpl-desc">Retrieval Augmented Generation</div>
+        <div class="tmpl-tags"><span class="tt tt-ai">AI Round</span><span class="tt tt-hard">Hard</span></div>
+      </div>
+      <button class="use-mini" onclick="goScreen('sc-recall')">Use</button>
+    </div>
+    <div class="tmpl-item" onclick="goScreen('sc-recall')">
+      <div class="tmpl-icon" style="background:#FBEAF0"><i class="ti ti-users" style="color:#993556;font-size:18px" aria-hidden="true"></i></div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">STAR Method</div>
+        <div class="tmpl-desc">Structure behavioral answers</div>
+        <div class="tmpl-tags"><span class="tt tt-hr">HR / Behavioral</span><span class="tt tt-easy">Easy</span></div>
+      </div>
+      <button class="use-mini" onclick="goScreen('sc-recall')">Use</button>
+    </div>
+    <button class="btn-outline" style="margin-top:4px" onclick="sendPrompt('Generate a recall template for Raft protocol with all sections: mental model, execution flow, edge cases, recall questions')"><i class="ti ti-sparkles" style="font-size:13px" aria-hidden="true"></i> AI: Generate Raft template ↗</button>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="bn-item act" id="bn-home" onclick="bnav(this,'sc-home')" aria-label="Home">
+      <i class="ti ti-home bn-icon" aria-hidden="true"></i>
+      <span class="bn-label">Home</span>
+    </button>
+    <button class="bn-item" id="bn-dsa" onclick="bnav(this,'sc-dsa')" aria-label="DSA">
+      <i class="ti ti-code bn-icon" aria-hidden="true"></i>
+      <span class="bn-label">DSA</span>
+    </button>
+    <button class="bn-item" id="bn-recall" onclick="bnav(this,'sc-recall')" aria-label="Recall">
+      <i class="ti ti-brain bn-icon" aria-hidden="true"></i>
+      <span class="bn-label">Recall</span>
+    </button>
+    <button class="bn-item has-badge" id="bn-queue" onclick="bnav(this,'sc-queue')" aria-label="Queue">
+      <div class="bn-badge">7</div>
+      <i class="ti ti-clock bn-icon" aria-hidden="true"></i>
+      <span class="bn-label">Queue</span>
+    </button>
+    <button class="bn-item" id="bn-templates" onclick="bnav(this,'sc-templates')" aria-label="Templates">
+      <i class="ti ti-template bn-icon" aria-hidden="true"></i>
+      <span class="bn-label">Templates</span>
+    </button>
+  </div>
+
+</div>
+</div>
+
+<script>
+var timerSec=0, timerInt=null;
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  var map={
+    'sc-home':'bn-home','sc-dsa':'bn-dsa',
+    'sc-recall':'bn-recall','sc-queue':'bn-queue','sc-templates':'bn-templates'
+  };
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('act'));
+  if(map[id]) document.getElementById(map[id]).classList.add('act');
+  if(id==='sc-recall') startTimer();
+  else stopTimer();
+}
+
+function bnav(btn, screenId){
+  goScreen(screenId);
+}
+
+function ptab(btn){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('act'));
+  btn.classList.add('act');
+}
+
+function revealM(el){
+  el.classList.add('open');
+  document.getElementById('m-hint').style.display='none';
+  document.getElementById('m-code').style.display='block';
+}
+
+function rateM(btn, score){
+  document.querySelectorAll('.rate-btn').forEach(b=>b.style.opacity='0.35');
+  btn.style.opacity='1';
+  document.getElementById('m-acc').textContent=Math.round(score)+'%';
+}
+
+function startTimer(){
+  stopTimer();
+  timerSec=0;
+  timerInt=setInterval(function(){
+    timerSec++;
+    var m=Math.floor(timerSec/60).toString().padStart(2,'0');
+    var s=(timerSec%60).toString().padStart(2,'0');
+    var el=document.getElementById('m-timer');
+    if(el) el.textContent=m+':'+s;
+  },1000);
+}
+
+function stopTimer(){ if(timerInt){clearInterval(timerInt);timerInt=null;} }
+</script>

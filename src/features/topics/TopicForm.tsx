@@ -54,26 +54,29 @@ function TopicForm({ initialTopic, onSubmit, onCancel }: TopicFormProps) {
     });
   }
 
+  const inputClass =
+    'w-full rounded-lg border border-[#dddbe7] bg-white px-3 py-2.5 text-sm outline-none transition focus:border-[#AFA9EC] focus:ring-2 focus:ring-[#EEEDFE] dark:border-[#292735] dark:bg-[#20202a] dark:focus:ring-[#26215C]';
+
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 rounded-3xl border border-slate-800 bg-slate-950/80 p-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 rounded-lg border border-[#dddbe7] bg-white p-4 dark:border-[#292735] dark:bg-[#1a1a23]">
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="space-y-2 text-sm text-slate-300">
+        <label className="space-y-2 text-sm">
           <span>Topic title</span>
           <input
             type="text"
             {...register('title', { required: true })}
             placeholder="Redis rate limiting"
-            className="w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+            className={inputClass}
           />
         </label>
-        <label className="space-y-2 text-sm text-slate-300">
+        <label className="space-y-2 text-sm">
           <span>Category</span>
           <select
             {...register('category')}
-            className="w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+            className={inputClass}
           >
             {categoryOptions.map((option) => (
-              <option key={option} value={option} className="bg-slate-950 text-slate-100">
+              <option key={option} value={option}>
                 {option}
               </option>
             ))}
@@ -82,33 +85,33 @@ function TopicForm({ initialTopic, onSubmit, onCancel }: TopicFormProps) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="space-y-2 text-sm text-slate-300">
+        <label className="space-y-2 text-sm">
           <span>Subcategory</span>
           <input
             type="text"
             {...register('subcategory')}
             placeholder="Caching / Rate limiting"
-            className="w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+            className={inputClass}
           />
         </label>
-        <label className="space-y-2 text-sm text-slate-300">
+        <label className="space-y-2 text-sm">
           <span>Tags</span>
           <input
             type="text"
             {...register('tags')}
             placeholder="redis, caching, performance"
-            className="w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+            className={inputClass}
           />
         </label>
       </div>
 
-      <label className="space-y-2 text-sm text-slate-300">
+      <label className="space-y-2 text-sm">
         <span>Description</span>
         <textarea
           {...register('description')}
           rows={4}
           placeholder="Why this topic matters and what to practice."
-          className="w-full rounded-3xl border border-slate-700 bg-slate-900/90 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+          className={inputClass}
         />
       </label>
 
@@ -116,13 +119,13 @@ function TopicForm({ initialTopic, onSubmit, onCancel }: TopicFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-2xl border border-slate-700 bg-slate-900/90 px-5 py-3 text-sm text-slate-200 transition hover:border-slate-600 hover:bg-slate-800"
+          className="rounded-lg border border-[#dddbe7] px-4 py-2.5 text-sm text-[#625f6c] transition hover:bg-[#f1f0f5] dark:border-[#292735] dark:text-[#b6b2c5] dark:hover:bg-[#20202a]"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+          className="rounded-lg bg-[#534AB7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3C3489]"
         >
           Save topic
         </button>

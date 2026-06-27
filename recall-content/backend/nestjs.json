@@ -1,0 +1,14 @@
+{
+  "module": "backend",
+  "framework": "nestjs",
+  "topics": [
+    {
+      "title": "Modular Architecture",
+      "summary": "Review controllers, providers, and Nest modules for clean structure."
+    },
+    {
+      "title": "Dependency Injection",
+      "summary": "Understand DI tokens, providers, and lifetime scope in Nest applications."
+    }
+  ]
+}
