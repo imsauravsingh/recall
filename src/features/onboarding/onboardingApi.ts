@@ -3,54 +3,91 @@ import type {
   LearningDomainRecommendation,
   OnboardingProfile,
 } from "./onboardingTypes";
+import { ApiRoutes, callApi } from "../../lib/api";
 
 const STORAGE_PROFILE_KEY = "recall:onboardingProfile";
 const STORAGE_PLAN_KEY = "recall:initialStudyPlan";
+const API_TIMEOUT_MS = 2500;
 
-export async function fetchOnboardingProfile(): Promise<OnboardingProfile | null> {
+function readLocal<T>(key: string): T | null {
   if (typeof window === "undefined") {
     return null;
   }
 
-  const payload = window.localStorage.getItem(STORAGE_PROFILE_KEY);
-  if (!payload) {
-    return null;
-  }
+  const payload = window.localStorage.getItem(key);
+  return payload ? (JSON.parse(payload) as T) : null;
+}
 
-  return JSON.parse(payload) as OnboardingProfile;
+function writeLocal(key: string, value: unknown) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }
+}
+
+async function callApiWithTimeout<T>(
+  url: string,
+  method: Parameters<typeof callApi<T>>[1] = "GET",
+  body?: unknown,
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+  try {
+    return await callApi<T>(url, method, body, controller.signal);
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+export async function fetchOnboardingProfile(): Promise<OnboardingProfile | null> {
+  try {
+    return await callApiWithTimeout<OnboardingProfile | null>(
+      ApiRoutes.onboarding.profile,
+    );
+  } catch {
+    return readLocal<OnboardingProfile>(STORAGE_PROFILE_KEY);
+  }
 }
 
 export async function saveOnboardingProfile(
   profile: OnboardingProfile,
 ): Promise<OnboardingProfile> {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify(profile));
-  }
+  writeLocal(STORAGE_PROFILE_KEY, profile);
 
-  return profile;
+  try {
+    return await callApiWithTimeout<OnboardingProfile>(
+      ApiRoutes.onboarding.profile,
+      "PUT",
+      profile,
+    );
+  } catch {
+    return profile;
+  }
 }
 
 export async function fetchInitialStudyPlan(): Promise<InitialStudyPlan | null> {
-  if (typeof window === "undefined") {
-    return null;
+  try {
+    const plans = await callApiWithTimeout<InitialStudyPlan[]>(
+      ApiRoutes.studyPlans.list,
+    );
+    return plans.find((plan) => plan.status !== "archived") ?? plans[0] ?? null;
+  } catch {
+    return readLocal<InitialStudyPlan>(STORAGE_PLAN_KEY);
   }
-
-  const payload = window.localStorage.getItem(STORAGE_PLAN_KEY);
-  if (!payload) {
-    return null;
-  }
-
-  return JSON.parse(payload) as InitialStudyPlan;
 }
 
 export async function saveInitialStudyPlan(
   plan: InitialStudyPlan,
 ): Promise<InitialStudyPlan> {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_PLAN_KEY, JSON.stringify(plan));
-  }
+  writeLocal(STORAGE_PLAN_KEY, plan);
 
-  return plan;
+  try {
+    const method = plan.id ? "PUT" : "POST";
+    const url = plan.id ? ApiRoutes.studyPlans.detail(plan.id) : ApiRoutes.studyPlans.list;
+    return await callApiWithTimeout<InitialStudyPlan>(url, method, plan);
+  } catch {
+    return plan;
+  }
 }
 
 export async function recommendDomains(
@@ -62,8 +99,14 @@ export async function recommendDomains(
 }
 
 export async function initializeWorkspace(): Promise<{ studyPlanId: string }> {
-  // Placeholder for future backend-backed workspace initialization.
-  return { studyPlanId: crypto.randomUUID() };
+  try {
+    return await callApiWithTimeout<{ studyPlanId: string }>(
+      ApiRoutes.onboarding.workspace,
+      "POST",
+    );
+  } catch {
+    return { studyPlanId: crypto.randomUUID() };
+  }
 }
 
 export async function isOnboardingComplete(): Promise<boolean> {

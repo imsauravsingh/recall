@@ -264,7 +264,7 @@ The AI layer is configurable and user-driven:
 
 > Update the phase status after completing each phase to keep the roadmap aligned with actual progress.
 
-### Phase 1 — Foundation and landing page (Complete)
+### Phase 1 — Foundation and landing page (Complete — Vite era)
 
 - Status: Completed
 - Create the Next.js app shell and public landing page.
@@ -275,24 +275,30 @@ The AI layer is configurable and user-driven:
 - Add an onboarding route and placeholder workflow for first-login setup.
 - Centralize all API route details and contract definitions in `API.md`.
 
-### Phase 2 — Authentication and user model (Planned)
+### Phase 2 — Authentication and user model (Complete)
 
-- Status: Planned
+- Status: Complete (2026-06-28)
+- Integrated @clerk/nextjs v7.5.9 with ClerkProvider in root layout.
+- middleware.ts protects all (app)/* routes using clerkMiddleware.
+- Signed-in users auto-redirect from / to /dashboard.
+- UserButton shown in header; user name pulled from useUser() hook.
+- Onboarding gate: users who haven't completed onboarding redirect to /onboarding.
+- Also completed full Vite → Next.js 15 App Router migration as part of this phase.
 - Integrate Clerk for authentication and session management.
 - Create user documents and editable preferences in MongoDB.
 - Add authenticated user context and profile state management.
 - Protect workspace pages, API routes, and server actions behind authentication.
 - Add profile and settings screens for updating onboarding answers and preferences.
 
-### Phase 3 — Core data layer (Planned)
+### Phase 3 — Core data layer (In Progress)
 
-- Status: Planned
+- Status: In Progress. mongoose installed, MongoDB URI available in .env. Models and repositories not yet created. API routes not yet created. All data still reads from IndexedDB/localStorage.
 - Create repository abstractions for users, learningDomains, studyPlans, topics, templates, resumes, recallSessions, aiHistory, activityLogs, syncQueue, promptTemplates, notifications, and aiProviderConfigs.
 - Implement server-side API routes that delegate to repository methods.
 - Add shared validation layers and type-safe DTOs.
 - Add optional IndexedDB caching for workspace data and a first-pass sync strategy.
 
-### Phase 4 — Learning Domains, onboarding, and workspace initialization (Complete)
+### Phase 4 — Learning Domains, onboarding, and workspace initialization (Complete — migrated to Next.js)
 
 - Status: Complete
 - Build the onboarding flow to collect designation, experience, technology, responsibilities, target role, target companies, daily study hours, and preparation timeline.
@@ -300,9 +306,9 @@ The AI layer is configurable and user-driven:
 - Automatically create an initial study plan, default templates, weekly goals, and a revision schedule after onboarding.
 - Save onboarding preferences to the user profile and allow later edits in Settings.
 
-### Phase 5 — Study plan workflows (In progress)
+### Phase 5 — Study plan workflows (Partially Complete)
 
-- Status: Planned
+- Status: ~80% done. Edit/save/duplicate/archive/restore work. Version history and multi-plan list still missing.
 - Add study plan creation, editing, duplication, archiving, restore, and version history.
 - Add support for domains, goals, milestones, tasks, and estimated commitment.
 - Add plan progress tracking, status updates, and plan health indicators.

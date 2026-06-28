@@ -1,87 +1,200 @@
+"use client";
+
 import { create } from "zustand";
-import type { StudyPlan } from "../../lib/contentService";
+import type { InterviewStudyPlan, WizardInput } from "@/lib/contentService";
 import {
+  fetchStudyPlans,
+  fetchStudyPlan,
+  createStudyPlan,
+  updateStudyPlan,
+  deleteStudyPlan,
   archiveStudyPlan,
+  restoreStudyPlan,
   duplicateStudyPlan,
-  loadStudyPlan,
-  saveStudyPlan,
+  markSessionComplete,
+  generateStudyPlan,
+  regeneratePlan,
+  regenerateWeek,
 } from "./studyPlanService";
+import { generateSessionSubTopics } from "./studyPlanClient";
 
 interface StudyPlanState {
-  plan: StudyPlan | null;
+  plans: InterviewStudyPlan[];
+  activePlan: InterviewStudyPlan | null;
   loading: boolean;
-  error?: string;
-  loadPlan: () => Promise<void>;
-  savePlan: (plan: StudyPlan) => Promise<void>;
-  duplicatePlan: () => Promise<void>;
-  archivePlan: () => Promise<void>;
-  restorePlan: () => Promise<void>;
+  generating: boolean;
+  error: string | null;
+
+  loadPlans: () => Promise<void>;
+  loadPlan: (id: string) => Promise<void>;
+  createPlan: (
+    plan: Omit<InterviewStudyPlan, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<InterviewStudyPlan>;
+  updatePlan: (
+    id: string,
+    patch: Partial<InterviewStudyPlan>,
+  ) => Promise<void>;
+  deletePlan: (id: string) => Promise<void>;
+  archivePlan: (id: string) => Promise<void>;
+  restorePlan: (id: string) => Promise<void>;
+  duplicatePlan: (id: string) => Promise<InterviewStudyPlan>;
+  toggleSession: (
+    planId: string,
+    weekNumber: number,
+    sessionId: string,
+    completed: boolean,
+  ) => Promise<void>;
+  generatePlan: (input: WizardInput) => Promise<InterviewStudyPlan>;
+  regenerateActivePlan: (id: string) => Promise<void>;
+  regenerateActivePlanWeek: (id: string, weekNumber: number) => Promise<void>;
+  generateSubTopicsForSession: (planId: string, sessionId: string) => Promise<void>;
+  clearError: () => void;
 }
 
 export const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
-  plan: null,
+  plans: [],
+  activePlan: null,
   loading: false,
-  loadPlan: async () => {
-    set({ loading: true, error: undefined });
+  generating: false,
+  error: null,
+
+  loadPlans: async () => {
+    set({ loading: true, error: null });
     try {
-      const plan = await loadStudyPlan();
-      set({ plan, loading: false });
-    } catch (error) {
+      const plans = await fetchStudyPlans();
+      set({ plans, loading: false });
+    } catch {
+      set({ loading: false, error: "Unable to load study plans." });
+    }
+  },
+
+  loadPlan: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const plan = await fetchStudyPlan(id);
+      set({ activePlan: plan, loading: false });
+    } catch {
       set({ loading: false, error: "Unable to load study plan." });
     }
   },
-  savePlan: async (plan) => {
-    set({ loading: true, error: undefined });
-    try {
-      const saved = await saveStudyPlan(plan);
-      set({ plan: saved, loading: false });
-    } catch (error) {
-      set({ loading: false, error: "Unable to save study plan." });
-    }
-  },
-  duplicatePlan: async () => {
-    const current = get().plan;
-    if (!current) {
-      return;
-    }
 
-    set({ loading: true, error: undefined });
-    try {
-      const duplicate = await duplicateStudyPlan(current);
-      set({ plan: duplicate, loading: false });
-    } catch (error) {
-      set({ loading: false, error: "Unable to duplicate study plan." });
-    }
+  createPlan: async (plan) => {
+    const created = await createStudyPlan(plan);
+    set((state) => ({ plans: [created, ...state.plans] }));
+    return created;
   },
-  archivePlan: async () => {
-    const current = get().plan;
-    if (!current) {
-      return;
-    }
 
-    set({ loading: true, error: undefined });
-    try {
-      const archived = await archiveStudyPlan({
-        ...current,
-        status: "archived",
-      });
-      set({ plan: archived, loading: false });
-    } catch (error) {
-      set({ loading: false, error: "Unable to archive study plan." });
-    }
+  updatePlan: async (id, patch) => {
+    const updated = await updateStudyPlan(id, patch);
+    set((state) => ({
+      plans: state.plans.map((p) => (p.id === id ? updated : p)),
+      activePlan: state.activePlan?.id === id ? updated : state.activePlan,
+    }));
   },
-  restorePlan: async () => {
-    const current = get().plan;
-    if (!current) {
-      return;
-    }
 
-    set({ loading: true, error: undefined });
+  deletePlan: async (id) => {
+    await deleteStudyPlan(id);
+    set((state) => ({
+      plans: state.plans.filter((p) => p.id !== id),
+      activePlan: state.activePlan?.id === id ? null : state.activePlan,
+    }));
+  },
+
+  archivePlan: async (id) => {
+    const updated = await archiveStudyPlan(id);
+    set((state) => ({
+      plans: state.plans.map((p) => (p.id === id ? updated : p)),
+      activePlan: state.activePlan?.id === id ? updated : state.activePlan,
+    }));
+  },
+
+  restorePlan: async (id) => {
+    const updated = await restoreStudyPlan(id);
+    set((state) => ({
+      plans: state.plans.map((p) => (p.id === id ? updated : p)),
+      activePlan: state.activePlan?.id === id ? updated : state.activePlan,
+    }));
+  },
+
+  duplicatePlan: async (id) => {
+    const copy = await duplicateStudyPlan(id);
+    set((state) => ({ plans: [copy, ...state.plans] }));
+    return copy;
+  },
+
+  toggleSession: async (planId, weekNumber, sessionId, completed) => {
+    const updated = await markSessionComplete(
+      planId,
+      weekNumber,
+      sessionId,
+      completed,
+    );
+    set((state) => ({
+      plans: state.plans.map((p) => (p.id === planId ? updated : p)),
+      activePlan:
+        state.activePlan?.id === planId ? updated : state.activePlan,
+    }));
+  },
+
+  generatePlan: async (input) => {
+    set({ generating: true, error: null });
     try {
-      const restored = await archiveStudyPlan({ ...current, status: "active" });
-      set({ plan: restored, loading: false });
-    } catch (error) {
-      set({ loading: false, error: "Unable to restore study plan." });
+      const plan = await generateStudyPlan(input);
+      set({ generating: false });
+      return plan;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "AI generation failed.";
+      set({ generating: false, error: message });
+      throw err;
     }
   },
+
+  regenerateActivePlan: async (id) => {
+    set({ generating: true, error: null });
+    try {
+      const updated = await regeneratePlan(id);
+      set((state) => ({
+        generating: false,
+        plans: state.plans.map((p) => (p.id === id ? updated : p)),
+        activePlan:
+          state.activePlan?.id === id ? updated : state.activePlan,
+      }));
+    } catch {
+      set({ generating: false, error: "Unable to regenerate plan." });
+    }
+  },
+
+  regenerateActivePlanWeek: async (id, weekNumber) => {
+    set({ generating: true, error: null });
+    try {
+      const updated = await regenerateWeek(id, weekNumber);
+      set((state) => ({
+        generating: false,
+        plans: state.plans.map((p) => (p.id === id ? updated : p)),
+        activePlan:
+          state.activePlan?.id === id ? updated : state.activePlan,
+      }));
+    } catch {
+      set({ generating: false, error: "Unable to regenerate week." });
+    }
+  },
+
+  generateSubTopicsForSession: async (planId, sessionId) => {
+    try {
+      const updated = await generateSessionSubTopics(planId, sessionId);
+      set((state) => ({
+        plans: state.plans.map((p) => (p.id === planId ? updated : p)),
+        activePlan:
+          state.activePlan?.id === planId ? updated : state.activePlan,
+      }));
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to generate prep list.";
+      set({ error: message });
+      throw err;
+    }
+  },
+
+  clearError: () => set({ error: null }),
 }));

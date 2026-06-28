@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
 import { templates } from './recallData';
 
 function tagClass(tag: string) {
@@ -31,7 +33,7 @@ function TemplatesPage() {
                 <span key={tag} className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${tagClass(tag)}`}>{tag}</span>
               ))}
             </div>
-            <Link to="/recall" className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#534AB7] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#3C3489]">
+            <Link href="/recall" className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#534AB7] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#3C3489]">
               Use template
             </Link>
           </article>

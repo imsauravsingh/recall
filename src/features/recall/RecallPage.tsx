@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
 import type { Note } from "../../lib/types";
 import { useTopicStore } from "../topics/topicStore";
 import { noteService } from "../topics/noteService";
@@ -51,7 +53,7 @@ const prompts = [
 ];
 
 function RecallPage() {
-  const location = useLocation();
+  const pathname = usePathname();
   const { topics, loadTopics } = useTopicStore();
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(68);

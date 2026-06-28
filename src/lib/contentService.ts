@@ -1,3 +1,142 @@
+import localManifest from "../../recall-content/manifest.json";
+import localStudyPlan from "../../recall-content/plans/monthly.json";
+
+// ── New AI-first interview study plan types ──────────────────────────────────
+
+export type InterviewAreaPriority = "critical" | "high" | "medium" | "low";
+
+export interface InterviewArea {
+  name: string;
+  priority: InterviewAreaPriority;
+  topics: string[];
+}
+
+export type SessionType =
+  | "dsa"
+  | "system-design"
+  | "behavioral"
+  | "low-level-design"
+  | "review"
+  | "mock"
+  | "resume";
+
+export type SubTopicType =
+  | "concept"
+  | "coding-problem"
+  | "design-problem"
+  | "behavioral"
+  | "know-cold";
+
+export interface SubTopic {
+  id: string;
+  title: string;
+  type: SubTopicType;
+  notes?: string;
+  source?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  completed: boolean;
+  completedAt?: string;
+}
+
+export interface DaySession {
+  id: string;
+  day: number;
+  type: SessionType;
+  topic: string;
+  durationMinutes: number;
+  notes?: string;
+  completed: boolean;
+  completedAt?: string;
+  subTopics?: SubTopic[];
+}
+
+export interface PlanWeek {
+  weekNumber: number;
+  theme: string;
+  areas: string[];
+  sessions: DaySession[];
+}
+
+export type MockSessionType = "dsa" | "system-design" | "behavioral" | "full";
+
+export interface MockSession {
+  id: string;
+  weekNumber: number;
+  type: MockSessionType;
+  scheduledDay: number;
+  durationMinutes: number;
+  completed: boolean;
+}
+
+export interface Milestone {
+  weekNumber: number;
+  description: string;
+  checkpoints: string[];
+}
+
+export interface RecallTemplate {
+  area: string;
+  sections: string[];
+}
+
+// ── Topic Library ────────────────────────────────────────────────────────────
+
+export interface TopicItem {
+  id: string;
+  name: string;
+  notes?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  url?: string;
+  solutionUrl?: string;
+  completed: boolean;
+  completedAt?: string;
+}
+
+export interface TopicGroup {
+  id: string;
+  name: string;
+  subtitle?: string;
+  lastRevisedAt?: string;
+  items: TopicItem[];
+}
+
+export interface TopicCategory {
+  id: string;
+  name: string;
+  groups: TopicGroup[];
+}
+
+export interface WizardInput {
+  targetRole: string;
+  techStack: string[];
+  yearsOfExperience: number;
+  targetTimeline: string;
+  targetCompany?: string;
+  jobDescription?: string;
+}
+
+export interface InterviewStudyPlan {
+  id: string;
+  title: string;
+  status: "active" | "archived" | "completed";
+  targetRole: string;
+  techStack: string[];
+  yearsOfExperience: number;
+  targetTimeline: string;
+  targetCompany?: string;
+  jobDescription?: string;
+  aiGenerated: boolean;
+  sourcePrompt?: string;
+  providerId?: string;
+  interviewAreas: InterviewArea[];
+  weeks: PlanWeek[];
+  mockInterviews: MockSession[];
+  milestones: Milestone[];
+  recallTemplates: RecallTemplate[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ContentManifest {
   version: string;
   lastUpdated: string;
@@ -41,45 +180,27 @@ export type ContentFile = Record<string, unknown>;
 const CONTENT_REMOTE_REPO =
   "https://cdn.jsdelivr.net/gh/<username>/recall-content";
 
-const localModules = import.meta.glob("../../recall-content/**/*.json", {
-  as: "json",
-  eager: true,
-}) as Record<string, ContentFile>;
-
 function getRemoteBaseUrl(branch = "main"): string {
   return `${CONTENT_REMOTE_REPO}@${branch}`;
 }
 
-const localManifest = localModules[
-  "../../recall-content/manifest.json"
-] as unknown as ContentManifest;
-const localStudyPlan = localModules[
-  "../../recall-content/plans/monthly.json"
-] as unknown as StudyPlan;
-
-export function getLocalManifest(): ContentManifest {
-  return localManifest;
+export function getLocalManifest(): ContentManifest | null {
+  return localManifest as ContentManifest;
 }
 
-export function getLocalStudyPlan(): StudyPlan {
-  return localStudyPlan;
+export function getLocalStudyPlan(): StudyPlan | null {
+  return localStudyPlan as StudyPlan;
 }
 
 export function getLocalModule(
-  category: string,
-  fileName: string,
+  _category: string,
+  _fileName: string,
 ): ContentFile | null {
-  const key = `../../recall-content/${category}/${fileName}.json`;
-  return localModules[key] ?? null;
+  return null;
 }
 
-export function getLocalModules(category: string): ContentFile[] {
-  const prefix = `../../recall-content/${category}/`;
-  return Object.keys(localModules)
-    .filter(
-      (path) => path.startsWith(prefix) && path !== `${prefix}manifest.json`,
-    )
-    .map((path) => localModules[path]);
+export function getLocalModules(_category: string): ContentFile[] {
+  return [];
 }
 
 export async function fetchRemoteManifest(

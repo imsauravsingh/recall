@@ -1,48 +1,101 @@
-import { getLocalStudyPlan } from "../../lib/contentService";
-import {
-  fetchInitialStudyPlan,
-  saveInitialStudyPlan,
-} from "../onboarding/onboardingApi";
-import type { StudyPlan } from "../../lib/contentService";
+import type { InterviewStudyPlan, WizardInput } from "@/lib/contentService";
+import { ApiRoutes, callApi } from "@/lib/api";
 
-export async function loadStudyPlan(): Promise<StudyPlan> {
-  const savedPlan = await fetchInitialStudyPlan();
-  return savedPlan ?? getLocalStudyPlan();
+export async function fetchStudyPlans(): Promise<InterviewStudyPlan[]> {
+  return callApi<InterviewStudyPlan[]>(ApiRoutes.studyPlans.list);
 }
 
-export async function saveStudyPlan(plan: StudyPlan): Promise<StudyPlan> {
-  const now = new Date().toISOString();
-  const saved = {
-    ...plan,
-    id: plan.id ?? crypto.randomUUID(),
-    status: plan.status ?? "active",
-    createdAt: plan.createdAt ?? now,
-    updatedAt: now,
-  };
-  await saveInitialStudyPlan(saved);
-  return saved;
+export async function fetchStudyPlan(id: string): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(ApiRoutes.studyPlans.detail(id));
 }
 
-export async function duplicateStudyPlan(plan: StudyPlan): Promise<StudyPlan> {
-  const duplicated = {
-    ...plan,
-    id: crypto.randomUUID(),
-    title: `${plan.title} (Copy)`,
-    status: "active" as const,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  await saveInitialStudyPlan(duplicated);
-  return duplicated;
+export async function createStudyPlan(
+  plan: Omit<InterviewStudyPlan, "id" | "createdAt" | "updatedAt">,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(ApiRoutes.studyPlans.list, "POST", plan);
 }
 
-export async function archiveStudyPlan(plan: StudyPlan): Promise<StudyPlan> {
-  const archived = {
-    ...plan,
-    status:
-      plan.status === "archived" ? ("active" as const) : ("archived" as const),
-    updatedAt: new Date().toISOString(),
-  };
-  await saveInitialStudyPlan(archived);
-  return archived;
+export async function updateStudyPlan(
+  id: string,
+  patch: Partial<InterviewStudyPlan>,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.update(id),
+    "PATCH",
+    patch,
+  );
+}
+
+export async function deleteStudyPlan(id: string): Promise<void> {
+  await callApi(ApiRoutes.studyPlans.delete(id), "DELETE");
+}
+
+export async function archiveStudyPlan(
+  id: string,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.archive(id),
+    "POST",
+  );
+}
+
+export async function restoreStudyPlan(
+  id: string,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.restore(id),
+    "POST",
+  );
+}
+
+export async function duplicateStudyPlan(
+  id: string,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.duplicate(id),
+    "POST",
+  );
+}
+
+export async function markSessionComplete(
+  planId: string,
+  weekNumber: number,
+  sessionId: string,
+  completed: boolean,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.progress(planId),
+    "PATCH",
+    { weekNumber, sessionId, completed },
+  );
+}
+
+export async function generateStudyPlan(
+  input: WizardInput,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.ai.generateStudyPlan,
+    "POST",
+    input,
+  );
+}
+
+export async function regeneratePlan(
+  id: string,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.regenerate(id),
+    "POST",
+  );
+}
+
+export async function regenerateWeek(
+  id: string,
+  weekNumber: number,
+): Promise<InterviewStudyPlan> {
+  return callApi<InterviewStudyPlan>(
+    ApiRoutes.studyPlans.regenerateWeek(id),
+    "POST",
+    { weekNumber },
+  );
 }

@@ -19,9 +19,17 @@ export const ApiRoutes = {
   studyPlans: {
     list: `${API_BASE}/study-plans`,
     detail: (id: string) => `${API_BASE}/study-plans/${id}`,
+    update: (id: string) => `${API_BASE}/study-plans/${id}`,
+    delete: (id: string) => `${API_BASE}/study-plans/${id}`,
     duplicate: (id: string) => `${API_BASE}/study-plans/${id}/duplicate`,
     archive: (id: string) => `${API_BASE}/study-plans/${id}/archive`,
     restore: (id: string) => `${API_BASE}/study-plans/${id}/restore`,
+    progress: (id: string) => `${API_BASE}/study-plans/${id}/progress`,
+    regenerate: (id: string) => `${API_BASE}/study-plans/${id}/regenerate`,
+    regenerateWeek: (id: string) =>
+      `${API_BASE}/study-plans/${id}/regenerate-week`,
+    generateSubTopics: (planId: string, sessionId: string) =>
+      `${API_BASE}/study-plans/${planId}/sessions/${sessionId}/generate-subtopics`,
   },
   topics: {
     list: `${API_BASE}/topics`,
@@ -47,6 +55,13 @@ export const ApiRoutes = {
     prompts: `${API_BASE}/ai/prompts`,
     generate: `${API_BASE}/ai/generate`,
     providers: `${API_BASE}/ai/providers`,
+    provider: (id: string) => `${API_BASE}/ai/providers/${id}`,
+    testProvider: (id: string) => `${API_BASE}/ai/providers/${id}/test`,
+    generateStudyPlan: `${API_BASE}/ai/generate-study-plan`,
+  },
+  topicLibrary: {
+    get: (categoryId: string) => `${API_BASE}/topic-library/${categoryId}`,
+    update: (categoryId: string) => `${API_BASE}/topic-library/${categoryId}`,
   },
   notifications: {
     list: `${API_BASE}/notifications`,

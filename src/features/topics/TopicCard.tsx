@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from "react";
 import Badge from "../ui/Badge";
 import { Topic } from "../../lib/types";

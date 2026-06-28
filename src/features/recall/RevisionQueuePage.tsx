@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useTopicStore } from "../topics/topicStore";
 import { useRevisionQueueStore } from "./revisionQueueStore";
 
@@ -111,7 +113,7 @@ function RevisionQueuePage() {
                     Remove
                   </button>
                   <Link
-                    to={topic ? `/recall?topicId=${topic.id}` : "/recall"}
+                    href={topic ? `/recall?topicId=${topic.id}` : "/recall"}
                     className="rounded-lg bg-[#534AB7] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#3C3489]"
                   >
                     Recall

@@ -1,6 +1,8 @@
+'use client';
+
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { useUser } from "@clerk/react";
+import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import { useTopicStore } from "../topics/topicStore";
 import { rounds } from "../recall/recallData";
 import { useRevisionQueueStore } from "../recall/revisionQueueStore";
@@ -32,22 +34,23 @@ function DashboardMetric({
 function DashboardPage() {
   const { user } = useUser();
   const firstName = user?.firstName ?? user?.emailAddresses[0]?.emailAddress?.split('@')[0] ?? 'there';
-  const { topics, loadTopics, loading } = useTopicStore();
+  const { topics, loadTopics } = useTopicStore();
   const { items: queueItems, loadQueue } = useRevisionQueueStore();
-  const { plan: studyPlan, loadPlan } = useStudyPlanStore();
+  const { plans, loadPlans } = useStudyPlanStore();
+  const studyPlan = plans.find((p) => p.status === "active") ?? plans[0];
   const currentWeek =
-    studyPlan?.weeks[Math.min(2, studyPlan.weeks.length - 1)] ??
+    studyPlan?.weeks.find((w) => w.sessions.some((s) => !s.completed)) ??
     studyPlan?.weeks[0];
   const [sessions, setSessions] = useState<RecallSession[]>([]);
 
   useEffect(() => {
     loadTopics();
     loadQueue();
+    void loadPlans();
     void dashboardService
       .getRecallSessions()
       .then((items) => setSessions(items));
-    void loadPlan();
-  }, [loadTopics, loadQueue, loadPlan]);
+  }, [loadTopics, loadQueue, loadPlans]);
 
   const stats = useMemo(() => {
     const active = topics.filter((topic) => !topic.archived).length;
@@ -71,7 +74,15 @@ function DashboardPage() {
           )
         : 0;
     const planStatus = studyPlan?.status ?? "draft";
-    const weeklyHours = studyPlan?.weeklyCommitmentHours ?? 0;
+    const allSessions = studyPlan?.weeks.flatMap((w) => w.sessions) ?? [];
+    const planProgress =
+      allSessions.length > 0
+        ? Math.round(
+            (allSessions.filter((s) => s.completed).length /
+              allSessions.length) *
+              100,
+          )
+        : 0;
 
     return {
       active,
@@ -80,7 +91,8 @@ function DashboardPage() {
       avgScore,
       completionPercent,
       planStatus,
-      weeklyHours,
+      planProgress,
+      totalSessions: allSessions.length,
     };
   }, [sessions, topics, queueItems, studyPlan]);
 
@@ -102,7 +114,7 @@ function DashboardPage() {
             </p>
           </div>
           <Link
-            to="/recall"
+            href="/recall"
             className="inline-flex items-center justify-center rounded-lg bg-[#534AB7] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#3C3489]"
           >
             Start recall session
@@ -127,9 +139,9 @@ function DashboardPage() {
           sub="Current study plan"
         />
         <DashboardMetric
-          label="Weekly commitment"
-          value={`${stats.weeklyHours} hrs`}
-          sub="Target hours"
+          label="Plan progress"
+          value={`${stats.planProgress}%`}
+          sub={`${stats.totalSessions} sessions total`}
         />
       </div>
 
@@ -160,7 +172,7 @@ function DashboardPage() {
           {rounds.map((round) => (
             <Link
               key={round.name}
-              to={round.name === "DSA" ? "/topics" : "/recall"}
+              href={round.name === "DSA" ? "/topics" : "/recall"}
               className="rounded-lg border border-[#dddbe7] bg-white p-3 transition hover:border-[#afa9ec] dark:border-[#292735] dark:bg-[#1a1a23]"
             >
               <div className="flex items-center gap-2">
@@ -192,7 +204,7 @@ function DashboardPage() {
           <h2 className="text-sm font-semibold">
             Recall Queue ({queueItems.length})
           </h2>
-          <Link to="/revision" className="text-xs font-medium text-[#534AB7]">
+          <Link href="/revision" className="text-xs font-medium text-[#534AB7]">
             View all
           </Link>
         </div>
@@ -248,17 +260,17 @@ function DashboardPage() {
             </p>
             <h2 className="mt-1 text-base font-semibold">
               {currentWeek
-                ? `${currentWeek.week}: ${currentWeek.goal}`
-                : "Loading plan..."}
+                ? `Week ${currentWeek.weekNumber}: ${currentWeek.theme}`
+                : "No plan yet"}
             </h2>
             <p className="mt-2 text-xs text-[#625f6c] dark:text-[#b6b2c5]">
               {studyPlan
-                ? `${studyPlan.monthlyGoals.length} goals · ${studyPlan.dailySchedule.length} daily sessions · ${studyPlan.weeklyCommitmentHours ?? 0} hrs/week`
-                : "Planning your first week..."}
+                ? `${(studyPlan.interviewAreas ?? []).length} interview areas · ${stats.totalSessions} sessions · ${studyPlan.targetTimeline ?? ""}`
+                : "Create a study plan to get started"}
             </p>
           </div>
           <Link
-            to="/plan"
+            href="/plan"
             className="rounded-lg border border-[#AFA9EC] bg-[#EEEDFE] px-3 py-2 text-center text-xs font-semibold text-[#3C3489]"
           >
             View plan
@@ -266,24 +278,146 @@ function DashboardPage() {
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-4">
           {currentWeek ? (
-            currentWeek.sections.map((section) => (
+            currentWeek.sessions.slice(0, 4).map((session) => (
               <div
-                key={section.title}
+                key={session.id}
                 className="rounded-lg bg-[#f6f6f8] p-3 dark:bg-[#20202a]"
               >
-                <p className="text-xs font-semibold">{section.title}</p>
-                <p className="mt-1 text-[11px] leading-4 text-[#625f6c] dark:text-[#b6b2c5]">
-                  {section.items.slice(0, 3).join(", ")}
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-[#534AB7]">
+                  {session.type.replace("-", " ")}
+                </p>
+                <p className="mt-1 text-[11px] leading-4 font-medium text-[#1f1f28] dark:text-white">
+                  {session.topic}
+                </p>
+                <p className="mt-0.5 text-[10px] text-[#888391]">
+                  {session.durationMinutes}m
                 </p>
               </div>
             ))
           ) : (
-            <div className="rounded-lg bg-[#f6f6f8] p-3 dark:bg-[#20202a]">
-              <p className="text-xs font-semibold">Loading plan details...</p>
+            <div className="col-span-4 rounded-lg bg-[#f6f6f8] p-3 dark:bg-[#20202a]">
+              <p className="text-xs text-[#625f6c] dark:text-[#b6b2c5]">
+                No active plan. <a href="/plan/new" className="text-[#534AB7] underline">Create one →</a>
+              </p>
             </div>
           )}
         </div>
       </section>
+
+      {/* Quick Actions */}
+      <section>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#888391]">
+          Quick actions
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Continue Study', icon: '📖', href: '/plan', color: 'bg-[#EEEDFE] text-[#3C3489] dark:bg-[#26215C] dark:text-[#CECBF6]' },
+            { label: 'Start Recall', icon: '🔁', href: '/recall', color: 'bg-[#EAF3DE] text-[#27500A] dark:bg-[#1a2e10] dark:text-[#a3d977]' },
+            { label: 'Create Study Plan', icon: '📋', href: '/plan', color: 'bg-[#FAEEDA] text-[#633806] dark:bg-[#2a1e08] dark:text-[#e8c07a]' },
+            { label: 'Add Topic', icon: '📚', href: '/topics', color: 'bg-[#E1F5EE] text-[#085041] dark:bg-[#082519] dark:text-[#6ecfb0]' },
+          ].map((action) => (
+            <Link
+              key={action.label}
+              href={action.href}
+              className={`flex items-center gap-2.5 rounded-xl p-3 text-xs font-semibold transition hover:opacity-90 ${action.color}`}
+            >
+              <span className="text-base">{action.icon}</span>
+              {action.label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Continue Learning */}
+      <section className="rounded-xl border border-[#dddbe7] bg-white p-4 dark:border-[#292735] dark:bg-[#1a1a23]">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Continue learning</h2>
+          <Link href="/topics" className="text-xs font-medium text-[#534AB7]">All topics</Link>
+        </div>
+        {topics.filter((t) => !t.archived).length === 0 ? (
+          <div className="rounded-xl border border-dashed border-[#dddbe7] bg-[#f6f6f8] p-5 text-center dark:border-[#292735] dark:bg-[#20202a]">
+            <p className="text-sm font-medium">No topics yet</p>
+            <p className="mt-1 text-xs text-[#625f6c] dark:text-[#b6b2c5]">Add your first topic to start learning.</p>
+            <Link href="/topics" className="mt-3 inline-block rounded-lg bg-[#534AB7] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#3C3489] transition">
+              Add topic
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-[#eceaf2] dark:divide-[#292735]">
+            {topics.filter((t) => !t.archived).slice(0, 4).map((topic) => (
+              <div key={topic.id} className="flex items-center justify-between gap-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-medium">{topic.title}</p>
+                  <p className="text-[11px] text-[#888391]">{topic.category}</p>
+                </div>
+                <Link href="/recall" className="shrink-0 rounded-lg bg-[#EEEDFE] px-2.5 py-1 text-[11px] font-semibold text-[#3C3489] hover:bg-[#e0deff] transition dark:bg-[#26215C] dark:text-[#CECBF6]">
+                  Recall
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Today's Recall + Upcoming Revision */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="rounded-xl border border-[#dddbe7] bg-white p-4 dark:border-[#292735] dark:bg-[#1a1a23]">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold">Today&apos;s recall</h2>
+            <Link href="/recall" className="text-xs font-medium text-[#534AB7]">Start</Link>
+          </div>
+          {queueItems.filter((i) => {
+            const diff = Math.ceil((new Date(i.dueDate).getTime() - Date.now()) / 86400000);
+            return diff <= 0 && i.status === 'Pending';
+          }).length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#dddbe7] bg-[#f6f6f8] p-4 text-center dark:border-[#292735] dark:bg-[#20202a]">
+              <p className="text-xs text-[#625f6c] dark:text-[#b6b2c5]">Nothing due today. You&apos;re on track!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {queueItems.filter((i) => {
+                const diff = Math.ceil((new Date(i.dueDate).getTime() - Date.now()) / 86400000);
+                return diff <= 0 && i.status === 'Pending';
+              }).slice(0, 3).map((item) => {
+                const topic = topics.find((t) => t.id === item.topicId);
+                return (
+                  <div key={item.id} className="flex items-center justify-between rounded-lg bg-[#f6f6f8] px-3 py-2 dark:bg-[#20202a]">
+                    <span className="text-xs font-medium truncate">{topic?.title ?? 'Untitled'}</span>
+                    <span className="ml-2 shrink-0 text-[11px] font-semibold text-[#E24B4A]">Due today</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-xl border border-[#dddbe7] bg-white p-4 dark:border-[#292735] dark:bg-[#1a1a23]">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold">Upcoming revision</h2>
+            <Link href="/revision" className="text-xs font-medium text-[#534AB7]">View all</Link>
+          </div>
+          {queueItems.filter((i) => i.status === 'Pending').length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#dddbe7] bg-[#f6f6f8] p-4 text-center dark:border-[#292735] dark:bg-[#20202a]">
+              <p className="text-xs text-[#625f6c] dark:text-[#b6b2c5]">No upcoming revisions. Add topics to your queue.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {queueItems.filter((i) => i.status === 'Pending').slice(0, 3).map((item) => {
+                const topic = topics.find((t) => t.id === item.topicId);
+                const diff = Math.ceil((new Date(item.dueDate).getTime() - Date.now()) / 86400000);
+                return (
+                  <div key={item.id} className="flex items-center justify-between rounded-lg bg-[#f6f6f8] px-3 py-2 dark:bg-[#20202a]">
+                    <span className="text-xs font-medium truncate">{topic?.title ?? 'Untitled'}</span>
+                    <span className="ml-2 shrink-0 text-[11px] text-[#888391]">
+                      {diff <= 0 ? 'Today' : `in ${diff}d`}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
 
       <section className="grid gap-2 sm:grid-cols-3">
         <DashboardMetric
@@ -299,9 +433,9 @@ function DashboardPage() {
           }
         />
         <DashboardMetric
-          label="Month 1 targets"
-          value={studyPlan?.monthlyGoals.length ?? 0}
-          sub="Confidence checks"
+          label="Interview areas"
+          value={studyPlan?.interviewAreas.length ?? 0}
+          sub="In active plan"
         />
       </section>
     </div>

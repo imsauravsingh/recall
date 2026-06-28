@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import TopicCard from './TopicCard';
 import TopicForm from './TopicForm';

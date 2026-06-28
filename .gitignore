@@ -6,3 +6,13 @@ dist
 .idea
 .vscode
 coverage
+
+# Next.js build output
+.next/
+out/
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+
+# Seed / one-off scripts (optional — commit if you want them in repo)
+# scripts/

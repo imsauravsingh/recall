@@ -1,5 +1,7 @@
+'use client';
+
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
   createInitialStudyPlan,
   recommendLearningDomains,
@@ -20,7 +22,7 @@ const initialProfile: OnboardingProfile = {
 };
 
 function OnboardingPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [profile, setProfile] = useState<OnboardingProfile>(initialProfile);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,7 +58,7 @@ function OnboardingPage() {
     setSubmitted(true);
     await saveOnboardingProfile(profile);
     await saveInitialStudyPlan(initialPlan);
-    navigate("/dashboard");
+    router.push("/dashboard");
   };
 
   return (
@@ -262,7 +264,7 @@ function OnboardingPage() {
           </div>
 
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => router.push("/dashboard")}
             className="mt-6 rounded-3xl bg-[#534AB7] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#3C3489]"
           >
             Go to dashboard
